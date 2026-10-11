@@ -1,6 +1,7 @@
 from fastapi import Depends, FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 from app.config import settings
 from app.db.models import PointBalance, User
@@ -25,6 +26,8 @@ def live_health() -> dict[str, str]:
 @app.post(f"{settings.api_prefix}/auth/telegram", tags=["auth"])
 def telegram_auth(payload: TelegramAuthRequest, request: Request) -> dict:
     enforce_rate_limit(request, action="telegram-auth", limit=10, window_seconds=60)
+    if len(settings.session_secret) < 32:
+        raise HTTPException(status_code=503, detail="Session signing is not configured")
     verified = validate_telegram_init_data(
         payload.init_data,
         settings.telegram_bot_token,
@@ -41,23 +44,31 @@ def telegram_auth(payload: TelegramAuthRequest, request: Request) -> dict:
             select(User).where(User.telegram_id == verified["telegram_id"]).with_for_update()
         )
         if user is None:
-            user = User(
-                telegram_id=verified["telegram_id"],
-                username=username,
-                status="active",
-            )
-            db.add(user)
-            db.flush()
-            db.add(PointBalance(user_id=user.id, available=0, pending=0))
-            db.flush()
-        else:
-            if user.status != "active":
-                from fastapi import HTTPException
-
-                raise HTTPException(status_code=403, detail="Account is not active")
-            user.username = username
-            db.add(user)
-            db.flush()
+            # A savepoint lets a concurrent first login lose the unique-key race without
+            # poisoning the surrounding transaction.
+            try:
+                with db.begin_nested():
+                    candidate = User(
+                        telegram_id=verified["telegram_id"],
+                        username=username,
+                        status="active",
+                    )
+                    db.add(candidate)
+                    db.flush()
+                    db.add(PointBalance(user_id=candidate.id, available=0, pending=0))
+                    db.flush()
+                user = candidate
+            except IntegrityError:
+                user = db.scalar(
+                    select(User).where(User.telegram_id == verified["telegram_id"]).with_for_update()
+                )
+                if user is None:
+                    raise
+        if user.status != "active":
+            raise HTTPException(status_code=403, detail="Account is not active")
+        user.username = username
+        db.add(user)
+        db.flush()
         user_id = user.id
         status_value = user.status
 
