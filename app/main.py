@@ -192,9 +192,9 @@ def post_farming_start(
     return result
 
 
-@app.post(f"{settings.api_prefix}/farming/claim", tags=["farming"])
+@app.post(f"{settings.api_prefix}/farming/{{session_id}}/claim", tags=["farming"])
 def post_farming_claim(
-    session_id: str = Field(),
+    session_id: str,
     session: dict = Depends(current_session),
 ) -> dict:
     user_id = _user_id(session)
