@@ -26,6 +26,12 @@ def mini_app_url() -> str:
 @router.message(CommandStart())
 async def start(message: Message) -> None:
     app_url = mini_app_url()
+    command = (message.text or "").split(maxsplit=1)
+    payload = command[1].strip() if len(command) > 1 else ""
+    if payload.startswith("ref_"):
+        referrer_id = payload[4:]
+        if referrer_id and len(referrer_id) <= 64 and all(c.isalnum() or c in "-_" for c in referrer_id):
+            app_url = app_url + "?ref=" + referrer_id
     text = (
         "⚡ <b>Airdrop Engine</b>\n\n"
         "Welcome to your points hub. Start a farming cycle, complete missions, "
