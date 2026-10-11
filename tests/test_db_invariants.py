@@ -91,17 +91,17 @@ def test_database_rejects_two_active_farming_sessions(db):
             reward_points=80, status="active",
         ))
         db.flush()
-        db.add(FarmingSession(
-            user_id=user_id, started_at=now, ends_at=now + timedelta(hours=8),
-            reward_points=80, status="active",
-        ))
         with pytest.raises(IntegrityError):
-            db.flush()
-        db.rollback()
+            with db.begin_nested():
+                db.add(FarmingSession(
+                    user_id=user_id, started_at=now, ends_at=now + timedelta(hours=8),
+                    reward_points=80, status="active",
+                ))
+                db.flush()
     db.expire_all()
     active = db.scalars(
         select(FarmingSession).where(
             FarmingSession.user_id == user_id, FarmingSession.status == "active"
         )
     ).all()
-    assert len(active) == 0
+    assert len(active) == 1
