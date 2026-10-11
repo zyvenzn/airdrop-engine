@@ -31,7 +31,7 @@ The current Compose API service expects a local `.env` file. Never commit it.
 - Authenticated `GET /api/v1/me` endpoint that returns the active user's profile and points balance.
 - Farming API: `GET /api/v1/farming`, `POST /api/v1/farming/start`, and `POST /api/v1/farming/{session_id}/claim`. Reward rate is server-controlled.
 - Task API: list active tasks, submit a task, and view the current user's submissions.
-- Referral attribution endpoint for authenticated users.
+- Referral attribution endpoint for authenticated users, plus owner/operator-only referral qualification with reward issuance and audit logging.
 - Admin role dependency, task creation, pending/review queue, task-submission review, and `GET /api/v1/admin/me`.
 - SQLAlchemy models and Alembic migrations for users, balances, ledger, farming sessions, tasks/submissions, referrals, admin users, and audit logs.
 - Points, farming, task review, and referral service functions.
@@ -44,7 +44,7 @@ The current Compose API service expects a local `.env` file. Never commit it.
 - Admin management and audit-log writing endpoints are not implemented; the current admin endpoint only verifies access and returns the admin identity.
 - These routes are an initial API layer; complete integration tests, operational safeguards, referral qualification policy, and admin-management workflows are still required.
 - Database concurrency, rollback, idempotency and ledger/balance consistency have **not yet been verified against PostgreSQL**.
-- Service-level tests are not a substitute for integration tests with a real database. CI status must be checked before treating a commit as validated.
+- SQLite-backed database invariant tests cover ledger idempotency, conflicting idempotency keys, insufficient balance rollback, and the active-farming uniqueness index. These do not emulate PostgreSQL row locks; PostgreSQL concurrency tests are still required. CI status must be checked before treating a commit as validated.
 - Session revocation/rotation, comprehensive admin audit enforcement, production secrets policy, backup/restore automation, frontend, and deployment hardening remain incomplete.
 - No token distribution is implemented or promised. Points do not guarantee token allocation or monetary value.
 
