@@ -52,6 +52,10 @@ def claim_farming(
     now: datetime | None = None,
 ) -> FarmingSession:
     current = now or datetime.now(timezone.utc)
+    # Keep lock ordering consistent with start_farming to reduce deadlock risk.
+    user = db.scalar(select(User).where(User.id == user_id).with_for_update())
+    if user is None or user.status != "active":
+        raise ValueError("account is not active")
     session = db.scalar(
         select(FarmingSession)
         .where(FarmingSession.id == session_id, FarmingSession.user_id == user_id)
@@ -59,9 +63,6 @@ def claim_farming(
     )
     if session is None:
         raise ValueError("farming session not found")
-    user = db.scalar(select(User).where(User.id == user_id).with_for_update())
-    if user is None or user.status != "active":
-        raise ValueError("account is not active")
     if session.status != "active" or session.claimed_at is not None:
         raise ValueError("farming session already claimed or inactive")
     if current < session.ends_at:
