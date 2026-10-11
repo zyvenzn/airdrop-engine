@@ -29,7 +29,10 @@ The current Compose API service expects a local `.env` file. Never commit it.
 - FastAPI liveness endpoint.
 - Telegram Mini App `initData` signature and age verification, user persistence, initial point-balance creation, and signed bearer sessions.
 - Authenticated `GET /api/v1/me` endpoint that returns the active user's profile and points balance.
-- Admin role dependency and read-only `GET /api/v1/admin/me` endpoint for active admins with supported roles.
+- Farming API: `GET /api/v1/farming`, `POST /api/v1/farming/start`, and `POST /api/v1/farming/{session_id}/claim`. Reward rate is server-controlled.
+- Task API: list active tasks, submit a task, and view the current user's submissions.
+- Referral attribution endpoint for authenticated users.
+- Admin role dependency, task creation, pending/review queue, task-submission review, and `GET /api/v1/admin/me`.
 - SQLAlchemy models and Alembic migrations for users, balances, ledger, farming sessions, tasks/submissions, referrals, admin users, and audit logs.
 - Points, farming, task review, and referral service functions.
 - Database-level partial unique index plus user-row locking to prevent multiple active farming sessions per user.
@@ -39,7 +42,7 @@ The current Compose API service expects a local `.env` file. Never commit it.
 ## Important limitations
 
 - Admin management and audit-log writing endpoints are not implemented; the current admin endpoint only verifies access and returns the admin identity.
-- Points/farming/task/referral service functions are not yet wired into public API routes.
+- These routes are an initial API layer; complete integration tests, operational safeguards, referral qualification policy, and admin-management workflows are still required.
 - Database concurrency, rollback, idempotency and ledger/balance consistency have **not yet been verified against PostgreSQL**.
 - Service-level tests are not a substitute for integration tests with a real database. CI status must be checked before treating a commit as validated.
 - Session revocation/rotation, comprehensive admin audit enforcement, production secrets policy, backup/restore automation, frontend, and deployment hardening remain incomplete.
