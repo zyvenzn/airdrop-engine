@@ -1,10 +1,77 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.db.models import PointsLedger, Referral, User
 from app.services.points import apply_points
+
+
+BASE_DROP_PLAYS = 3
+# Each *qualified* friend adds one extra Drop play per day, capped to bound abuse.
+# Pending referrals do not count, so self-made alt accounts cannot farm extra plays.
+MAX_BONUS_DROP_PLAYS = 5
+
+
+def count_qualified_referrals(db: Session, user_id: str) -> int:
+    return int(
+        db.scalar(
+            select(func.count(Referral.id)).where(
+                Referral.referrer_id == user_id, Referral.status == "qualified"
+            )
+        )
+        or 0
+    )
+
+
+def bonus_drop_plays(qualified_referrals: int) -> int:
+    return max(0, min(int(qualified_referrals), MAX_BONUS_DROP_PLAYS))
+
+
+def daily_drop_limit(db: Session, user_id: str) -> int:
+    return BASE_DROP_PLAYS + bonus_drop_plays(count_qualified_referrals(db, user_id))
+
+
+def list_friends(db: Session, *, user_id: str, limit: int = 100) -> dict:
+    rows = db.execute(
+        select(Referral, User.username)
+        .join(User, User.id == Referral.referred_id)
+        .where(Referral.referrer_id == user_id)
+        .order_by(Referral.created_at.desc())
+        .limit(limit)
+    ).all()
+    rewards = {
+        reference_id: int(amount)
+        for reference_id, amount in db.execute(
+            select(PointsLedger.reference_id, PointsLedger.amount).where(
+                PointsLedger.user_id == user_id,
+                PointsLedger.event_type == "referral_reward",
+            )
+        ).all()
+    }
+    items = [
+        {
+            "username": username or "Anonymous",
+            "status": referral.status,
+            "joined_at": referral.created_at,
+            "qualified_at": referral.qualified_at,
+            "reward_points": rewards.get(referral.id, 0),
+        }
+        for referral, username in rows
+    ]
+    qualified = count_qualified_referrals(db, user_id)
+    total = int(
+        db.scalar(select(func.count(Referral.id)).where(Referral.referrer_id == user_id)) or 0
+    )
+    return {
+        "items": items,
+        "total": total,
+        "qualified": qualified,
+        "pending": max(0, total - qualified),
+        "points_earned": sum(rewards.values()),
+        "bonus_drop_plays": bonus_drop_plays(qualified),
+        "max_bonus_drop_plays": MAX_BONUS_DROP_PLAYS,
+    }
 
 
 def attribute_referral(db: Session, *, referrer_id: str, referred_id: str) -> Referral:
