@@ -19,6 +19,10 @@ def start_farming(
     if points_per_hour <= 0 or duration_hours <= 0 or duration_hours > 24:
         raise ValueError("invalid farming configuration")
     current = now or datetime.now(timezone.utc)
+    # Lock the parent user row first; an empty active-session query cannot serialize concurrent starts.
+    user = db.scalar(select(User).where(User.id == user_id).with_for_update())
+    if user is None:
+        raise ValueError("user not found")
     active = db.scalar(
         select(FarmingSession)
         .where(FarmingSession.user_id == user_id, FarmingSession.status == "active")
