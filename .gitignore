@@ -1,0 +1,34 @@
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local data
+data/
+*.sqlite3
+*.db
+
+# Node
+node_modules/
+.next/
+dist/
+coverage/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
