@@ -35,7 +35,7 @@ class FakeSession:
 
 def test_start_farming_sets_server_timed_session():
     now = datetime(2026, 1, 1, tzinfo=timezone.utc)
-    db = FakeSession([SimpleNamespace(id="user-1"), None])
+    db = FakeSession([SimpleNamespace(id="user-1", status="active"), None])
     session = start_farming(db, user_id="user-1", now=now)
     assert session.started_at == now
     assert session.ends_at == now + timedelta(hours=8)
@@ -64,7 +64,7 @@ def test_claim_farming_rejects_already_claimed():
         claimed_at=now, ends_at=now - timedelta(seconds=1), reward_points=80,
     )
     with pytest.raises(ValueError, match="already claimed"):
-        claim_farming(FakeSession([farming]), user_id="user-1", session_id="farm-1", now=now)
+        claim_farming(FakeSession([SimpleNamespace(id="user-1", status="active"), farming]), user_id="user-1", session_id="farm-1", now=now)
 
 
 def test_apply_points_rejects_zero_and_bad_bucket():
