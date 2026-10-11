@@ -22,7 +22,8 @@ from app.security.sessions import issue_session
 from app.security.telegram import validate_telegram_init_data
 from app.services.farming import claim_farming, start_farming
 from app.services.points import apply_points
-from app.services.referrals import attribute_referral, qualify_referral
+from app.services.checkin import AlreadyCheckedIn, checkin_status, do_checkin
+from app.services.referrals import attribute_referral, daily_drop_limit, list_friends, qualify_referral
 from app.services.tasks import review_task, submit_task
 
 
@@ -504,13 +505,15 @@ def post_drop_start(request: Request, session: dict = Depends(current_session)) 
     enforce_rate_limit(request, action="drop-start", limit=5, window_seconds=60)
     user_id = _user_id(session)
     day_key = datetime.now(timezone.utc).date().isoformat()
+    with SessionLocal() as db:
+        daily_limit = daily_drop_limit(db, user_id)
     redis = Redis.from_url(settings.redis_url, decode_responses=True, socket_timeout=1)
     try:
         user_key = f"drop:daily:{user_id}:{day_key}"
         plays = redis.incr(user_key)
         if plays == 1:
             redis.expire(user_key, 86400)
-        if plays > 3:
+        if plays > daily_limit:
             redis.decr(user_key)
             raise HTTPException(status_code=429, detail="Daily Drop plays used. Come back tomorrow.")
         session_id = str(uuid4())
@@ -519,11 +522,50 @@ def post_drop_start(request: Request, session: dict = Depends(current_session)) 
             90,
             json.dumps({"started_at": time.time(), "day": day_key}),
         )
-        return {"session_id": session_id, "duration_seconds": 30, "plays_used": plays, "plays_remaining": 3 - plays}
+        return {"session_id": session_id, "duration_seconds": 30, "plays_used": plays, "plays_remaining": daily_limit - plays, "daily_limit": daily_limit}
     finally:
         redis.close()
 
 
+
+
+
+def _require_active_user(db, user_id: str) -> None:
+    user = db.scalar(select(User).where(User.id == user_id))
+    if user is None or user.status != "active":
+        raise HTTPException(status_code=403, detail="Account is not active")
+
+
+@app.get(f"{settings.api_prefix}/checkin", tags=["checkin"])
+def get_checkin(session: dict = Depends(current_session)) -> dict:
+    user_id = _user_id(session)
+    today = datetime.now(timezone.utc).date()
+    with SessionLocal() as db:
+        _require_active_user(db, user_id)
+        return checkin_status(db, user_id=user_id, today=today)
+
+
+@app.post(f"{settings.api_prefix}/checkin", tags=["checkin"])
+def post_checkin(request: Request, session: dict = Depends(current_session)) -> dict:
+    enforce_rate_limit(request, action="daily-checkin", limit=5, window_seconds=60)
+    user_id = _user_id(session)
+    today = datetime.now(timezone.utc).date()
+    try:
+        with SessionLocal.begin() as db:
+            result = do_checkin(db, user_id=user_id, today=today)
+    except AlreadyCheckedIn as exc:
+        raise HTTPException(status_code=409, detail="Already checked in today. Come back tomorrow.") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    return result
+
+
+@app.get(f"{settings.api_prefix}/friends", tags=["referrals"])
+def get_friends(session: dict = Depends(current_session)) -> dict:
+    user_id = _user_id(session)
+    with SessionLocal() as db:
+        _require_active_user(db, user_id)
+        return list_friends(db, user_id=user_id)
 
 
 @app.get(f"{settings.api_prefix}/leaderboard", tags=["game"])
@@ -586,7 +628,9 @@ def get_drop_status(session: dict = Depends(current_session)) -> dict:
     redis = Redis.from_url(settings.redis_url, decode_responses=True, socket_timeout=1)
     try:
         plays = int(redis.get(f"drop:daily:{user_id}:{day_key}") or 0)
-        return {"plays_used": min(plays, 3), "plays_remaining": max(0, 3 - plays), "daily_limit": 3}
+        with SessionLocal() as db:
+            daily_limit = daily_drop_limit(db, user_id)
+        return {"plays_used": min(plays, daily_limit), "plays_remaining": max(0, daily_limit - plays), "daily_limit": daily_limit}
     finally:
         redis.close()
 
