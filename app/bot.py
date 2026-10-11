@@ -52,6 +52,29 @@ async def fallback(message: Message) -> None:
     await start(message)
 
 
+async def health_server() -> None:
+    async def handle(reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
+        try:
+            await reader.readline()
+            while True:
+                line = await reader.readline()
+                if line in (b"\\r\\n", b"\\n", b""):
+                    break
+            writer.write(
+                b"HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\n"
+                b"Content-Length: 15\\r\\nConnection: close\\r\\n\\r\\n"
+                b'{"status":"ok"}'
+            )
+            await writer.drain()
+        finally:
+            writer.close()
+            await writer.wait_closed()
+
+    server = await asyncio.start_server(handle, "0.0.0.0", int(os.getenv("PORT", "8000")))
+    async with server:
+        await server.serve_forever()
+
+
 async def main() -> None:
     token = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
     if not token:
@@ -64,7 +87,7 @@ async def main() -> None:
     # Telegram bot identity is fetched at startup to validate the configured token.
     me = await bot.get_me()
     logging.info("Starting Airdrop Engine bot as @%s; Mini App URL configured", me.username)
-    await dispatcher.start_polling(bot, allowed_updates=dispatcher.resolve_used_update_types())
+    await asyncio.gather(health_server(), dispatcher.start_polling(bot, allowed_updates=dispatcher.resolve_used_update_types()))
 
 
 if __name__ == "__main__":
