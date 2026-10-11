@@ -15,7 +15,7 @@ from sqlalchemy import delete, select, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.db.models import FarmingSession, PointBalance, PointsLedger, User
-from app.services.farming import claim_farming
+from app.services.farming import claim_farming, start_farming
 from app.services.points import apply_points
 
 
@@ -128,6 +128,52 @@ def test_concurrent_farming_claim_rewards_once():
             assert balance is not None and balance.available == 80
             assert len(entries) == 1
             assert farming.status == "claimed"
+    finally:
+        with SessionFactory.begin() as db:
+            user = db.scalar(select(User).where(User.telegram_id == telegram_id))
+            if user is not None:
+                db.execute(delete(FarmingSession).where(FarmingSession.user_id == user.id))
+                db.execute(delete(PointsLedger).where(PointsLedger.user_id == user.id))
+                db.execute(delete(PointBalance).where(PointBalance.user_id == user.id))
+                db.delete(user)
+        engine.dispose()
+
+
+def test_concurrent_farming_start_creates_only_one_active_session():
+    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+    SessionFactory = sessionmaker(bind=engine, expire_on_commit=False)
+    telegram_id = 8_000_000_000 + int(uuid4().int % 1_000_000_000)
+    now = datetime.now(timezone.utc)
+
+    try:
+        with SessionFactory.begin() as db:
+            user = User(telegram_id=telegram_id, username="pg-farming-start-test", status="active")
+            db.add(user)
+            db.flush()
+            user_id = user.id
+
+        barrier = Barrier(2)
+
+        def start_once():
+            barrier.wait(timeout=10)
+            try:
+                with SessionFactory.begin() as db:
+                    start_farming(db, user_id=user_id, now=now)
+                return "started"
+            except ValueError:
+                return "rejected"
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            outcomes = list(pool.map(lambda _: start_once(), range(2)))
+
+        assert outcomes.count("started") == 1
+        assert outcomes.count("rejected") == 1
+        with SessionFactory() as db:
+            active = db.scalars(select(FarmingSession).where(
+                FarmingSession.user_id == user_id,
+                FarmingSession.status == "active",
+            )).all()
+            assert len(active) == 1
     finally:
         with SessionFactory.begin() as db:
             user = db.scalar(select(User).where(User.telegram_id == telegram_id))
