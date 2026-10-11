@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from app.main import FarmingStartRequest, ReferralQualifyRequest, TaskReviewRequest, TaskSubmitRequest
+from app.main import (\n    FarmingStartRequest, ReferralAttributeRequest, ReferralQualifyRequest,\n    TaskCreateRequest, TaskReviewRequest, TaskSubmitRequest, TelegramAuthRequest,\n)
 
 
 def test_farming_reward_rate_is_not_client_configurable():
@@ -29,3 +29,31 @@ def test_task_review_rejects_unknown_fields():
 def test_referral_qualification_rejects_unknown_fields():
     with pytest.raises(ValidationError):
         ReferralQualifyRequest.model_validate({"reward_points": 10, "admin_id": "attacker"})
+
+
+
+def test_telegram_auth_rejects_unexpected_identity_fields():
+    with pytest.raises(ValidationError):
+        TelegramAuthRequest.model_validate(
+            {"init_data": "signed-data", "telegram_id": 123456}
+        )
+
+
+def test_referral_attribution_rejects_unexpected_fields():
+    with pytest.raises(ValidationError):
+        ReferralAttributeRequest.model_validate(
+            {"referrer_id": "user-1", "reward_points": 100000}
+        )
+
+
+def test_admin_task_creation_rejects_unexpected_fields():
+    with pytest.raises(ValidationError):
+        TaskCreateRequest.model_validate(
+            {
+                "title": "Follow channel",
+                "task_type": "social",
+                "verification_type": "manual",
+                "reward_points": 10,
+                "role": "owner",
+            }
+        )
