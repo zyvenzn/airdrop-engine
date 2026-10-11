@@ -38,3 +38,18 @@ jobs:
         run: alembic upgrade head
       - name: Run tests
         run: python -m pytest
+
+  deployment-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate staging Compose configuration
+        env:
+          POSTGRES_DB: airdrop_engine_staging
+          POSTGRES_USER: airdrop
+          POSTGRES_PASSWORD: ci-only-password
+          TELEGRAM_BOT_TOKEN: ci-placeholder-token
+          SESSION_SECRET: ci-only-session-secret-at-least-32-characters
+        run: docker compose --env-file /dev/null -f docker-compose.staging.yml config --quiet
+      - name: Build API container
+        run: docker build --tag airdrop-engine:ci .
