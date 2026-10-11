@@ -1,12 +1,15 @@
 import json
 import os
+import time
 from datetime import datetime, timezone
+from uuid import uuid4
 from pathlib import Path
 from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field
+from redis import Redis
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
@@ -487,3 +490,77 @@ def post_game_tap(request: Request, session: dict = Depends(current_session)) ->
         result["awarded_points"] = GAME_TAP_REWARD
         result["tap_number"] = tap_number
     return result
+
+
+class DropFinishRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    session_id: str = Field(min_length=36, max_length=36)
+    score: int = Field(ge=0, le=1000)
+
+
+@app.post(f"{settings.api_prefix}/game/drop/start", tags=["game"])
+def post_drop_start(request: Request, session: dict = Depends(current_session)) -> dict:
+    enforce_rate_limit(request, action="drop-start", limit=5, window_seconds=60)
+    user_id = _user_id(session)
+    day_key = datetime.now(timezone.utc).date().isoformat()
+    redis = Redis.from_url(settings.redis_url, decode_responses=True, socket_timeout=1)
+    try:
+        user_key = f"drop:daily:{user_id}:{day_key}"
+        plays = redis.incr(user_key)
+        if plays == 1:
+            redis.expire(user_key, 86400)
+        if plays > 3:
+            redis.decr(user_key)
+            raise HTTPException(status_code=429, detail="Daily Drop plays used. Come back tomorrow.")
+        session_id = str(uuid4())
+        redis.setex(
+            f"drop:session:{user_id}:{session_id}",
+            90,
+            json.dumps({"started_at": time.time(), "day": day_key}),
+        )
+        return {"session_id": session_id, "duration_seconds": 30, "plays_used": plays, "plays_remaining": 3 - plays}
+    finally:
+        redis.close()
+
+
+@app.post(f"{settings.api_prefix}/game/drop/finish", tags=["game"])
+def post_drop_finish(
+    payload: DropFinishRequest,
+    request: Request,
+    session: dict = Depends(current_session),
+) -> dict:
+    enforce_rate_limit(request, action="drop-finish", limit=10, window_seconds=60)
+    user_id = _user_id(session)
+    redis = Redis.from_url(settings.redis_url, decode_responses=True, socket_timeout=1)
+    key = f"drop:session:{user_id}:{payload.session_id}"
+    try:
+        raw = redis.get(key)
+        if not raw:
+            raise HTTPException(status_code=409, detail="Drop session expired or already claimed")
+        challenge = json.loads(raw)
+        elapsed = time.time() - float(challenge["started_at"])
+        if elapsed < 25:
+            raise HTTPException(status_code=409, detail="Finish the 30-second round before claiming")
+        if challenge.get("day") != datetime.now(timezone.utc).date().isoformat():
+            raise HTTPException(status_code=409, detail="Drop session crossed the daily reset")
+        award = min(payload.score, 50)
+        if award < 1:
+            redis.delete(key)
+            return {"awarded_points": 0, "score": payload.score, "message": "No points this round"}
+        with SessionLocal.begin() as db:
+            user = db.scalar(select(User).where(User.id == user_id).with_for_update())
+            if user is None or user.status != "active":
+                raise HTTPException(status_code=403, detail="Account is not active")
+            apply_points(
+                db,
+                user_id=user_id,
+                amount=award,
+                event_type="game_drop",
+                reference_id=payload.session_id,
+                idempotency_key=f"drop:{user_id}:{payload.session_id}",
+            )
+        redis.delete(key)
+        return {"awarded_points": award, "score": payload.score, "message": "Drop rewards credited"}
+    finally:
+        redis.close()
