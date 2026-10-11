@@ -1,160 +1,645 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#0a0605"><title>BULLSHIT — Join the Herd</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0a0605">
+<title>BULLSHIT — Join the Herd</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Press+Start+2P&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{color-scheme:dark;--bg:#0a0605;--panel:#150e0c;--panel2:#1d1311;--line:#33211d;--muted:#a8968a;--text:#f1e8d6;--red:#ff2a3d;--crimson:#8c0f1d;--ink:#0a0605;--display:'Bebas Neue',Impact,'Arial Narrow',sans-serif;--mono:'Space Mono',ui-monospace,Menlo,monospace}
-*{box-sizing:border-box}
-body{margin:0;background:radial-gradient(ellipse at top,#2a0c0c 0,var(--bg) 55%);font:15px/1.45 system-ui,-apple-system,sans-serif;color:var(--text);padding:18px 16px calc(28px + env(safe-area-inset-bottom));max-width:560px;margin:auto}
-.top{display:flex;align-items:center;justify-content:space-between;margin:6px 0 20px}
-.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:26px;letter-spacing:1.5px;line-height:1}
-.brand span{color:var(--red)}
-.brand img{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--panel);object-fit:cover}
-.pill{border:1px solid var(--line);border-radius:20px;padding:6px 10px;color:var(--muted);font:700 11px var(--mono)}
-.eyebrow{color:var(--red);text-transform:uppercase;font:700 11px var(--mono);letter-spacing:2px}
-.hero h1{font:400 46px/0.95 var(--display);letter-spacing:1px;margin:8px 0}
-.hero h1 em{font-style:normal;color:var(--red)}
-.hero p{color:var(--muted);margin:8px 0 18px}
-.balance{background:linear-gradient(135deg,#2a1210,#170d0b 65%);border:1px solid #4a2822;border-radius:22px;padding:20px;position:relative;overflow:hidden}
-.balance:after{content:"🐂";position:absolute;right:10px;top:-14px;font-size:96px;opacity:.1}
-.balance-label{color:#b9a597;font:700 11px var(--mono);letter-spacing:1px}
-.points{font:400 46px/1.05 var(--display);letter-spacing:1px;margin:4px 0}
-.points small{font:700 13px var(--mono);color:var(--red);letter-spacing:0}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 18px}
-.stat{background:var(--panel);border:1px solid var(--line);padding:13px;border-radius:16px}
-.stat .label{color:var(--muted);font:700 10px var(--mono);letter-spacing:1px}
-.stat strong{display:block;font:400 22px var(--display);letter-spacing:.5px;margin-top:4px}
-.section{display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px}
-.section h2{font:400 24px var(--display);letter-spacing:1px;margin:0}
-.section small{color:var(--muted)}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:10px}
-.farm-row{display:flex;align-items:center;gap:12px}
-.orb{height:48px;width:48px;flex:none;display:grid;place-items:center;background:#ff2a3d14;border:1px solid #ff2a3d55;border-radius:15px;font-size:24px}
-.grow{flex:1;min-width:0}.grow strong{display:block}.grow small{color:var(--muted)}
-button{border:0;border-radius:13px;padding:12px 15px;font:700 13px var(--mono);letter-spacing:.3px;background:var(--red);color:var(--ink);cursor:pointer}
-button:active:not(:disabled){transform:translateY(1px)}
+:root{
+  color-scheme:dark;
+  --bg:#0a0605;--panel:#150e0c;--panel2:#1f1411;--line:#33211d;--muted:#a8968a;--text:#f1e8d6;
+  --red:#ff2a3d;--crimson:#8c0f1d;--gold:#ffc83d;--ink:#0a0605;
+  --display:'Bebas Neue',Impact,'Arial Narrow',sans-serif;
+  --mono:'Space Mono',ui-monospace,Menlo,monospace;
+  --pixel:'Press Start 2P',var(--mono);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg)}
+body{
+  margin:0 auto;max-width:560px;color:var(--text);font:15px/1.45 system-ui,-apple-system,sans-serif;
+  padding:14px 16px calc(96px + env(safe-area-inset-bottom));
+  background:radial-gradient(ellipse 120% 50% at 50% 0,#3a0f0f 0,transparent 70%),var(--bg);
+  min-height:100vh;overflow-x:hidden;user-select:none;-webkit-user-select:none;
+}
+button{border:0;border-radius:14px;padding:13px 16px;font:700 13px var(--mono);letter-spacing:.3px;background:var(--red);color:var(--ink);cursor:pointer;transition:transform .08s,opacity .2s}
+button:active:not(:disabled){transform:translateY(2px) scale(.99)}
 button:disabled{opacity:.4;cursor:not-allowed}
 .secondary{background:var(--panel2);color:var(--text);border:1px solid #4a2f29}
 .wide{width:100%;margin-top:14px}
-.bar{height:7px;background:#2c1a17;border-radius:10px;overflow:hidden;margin-top:13px}
-.bar div{height:100%;background:var(--red);width:0%;transition:width .3s}
-.task{display:flex;align-items:flex-start;gap:12px}.task .grow{flex:1}
-.reward{color:var(--red);font:700 12px var(--mono);margin-top:4px}
-.task p{color:var(--muted);font-size:12px;margin:5px 0}
-.refbox{display:flex;gap:8px;margin-top:12px}
-.refbox input{min-width:0;flex:1;background:#0f0908;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px;font:400 12px var(--mono)}
-.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:20px 0}
-.nav button{background:transparent;color:var(--muted);border:1px solid var(--line);padding:11px 4px;font-size:12px}
-.nav button.active{color:var(--red);border-color:#ff2a3d77;background:#ff2a3d0f}
-.view{display:none}.view.active{display:block}
-.notice{display:none;border-radius:12px;padding:12px;background:#3a1a14;color:#ffc9a8;margin:10px 0;font-size:13px}
-.empty{color:var(--muted);font-size:13px;padding:12px 0}
-.foot{text-align:center;color:#7a6a60;font:400 10px var(--mono);letter-spacing:.5px;margin-top:26px}
-.foot b{display:block;color:var(--muted);font:400 16px var(--display);letter-spacing:2px;margin-bottom:4px}
+.eyebrow{color:var(--red);text-transform:uppercase;font:700 11px var(--mono);letter-spacing:2px}
+.muted{color:var(--muted)}
 
-/* daily check-in */
-.streak-badge{text-align:center;flex:none;min-width:64px}
-.streak-badge b{display:block;font:400 30px/1 var(--display);color:var(--red)}
+/* top bar */
+.top{display:flex;align-items:center;justify-content:space-between;margin:2px 0 14px}
+.brand{display:flex;align-items:center;gap:9px;font:400 28px/1 var(--display);letter-spacing:1.5px}
+.brand .word span{color:var(--red)}
+.brand img{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:var(--panel);object-fit:cover}
+.pill{border:1px solid var(--line);border-radius:20px;padding:6px 10px;color:var(--muted);font:700 10px var(--mono);letter-spacing:.5px}
+.pill.on{color:var(--red);border-color:#ff2a3d66}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translate(-50%,20px);opacity:0;pointer-events:none;z-index:40;max-width:min(92vw,520px);
+  background:#2a1210;border:1px solid #ff2a3d77;color:var(--text);padding:11px 15px;border-radius:14px;font-size:13px;box-shadow:0 8px 30px #000a;transition:opacity .2s,transform .2s;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.good{border-color:#ffc83d88;background:#2a2010}
+
+/* hero */
+.hero-card{position:relative;background:linear-gradient(160deg,#2b110f 0,#150b0a 60%);border:1px solid #4a2822;border-radius:26px;padding:16px 16px 18px;overflow:hidden;text-align:center}
+.hero-card:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 38%,#ff2a3d26 0,transparent 55%);pointer-events:none}
+.bubble{position:relative;display:inline-block;max-width:88%;background:var(--text);color:#1a0d0b;border-radius:16px;padding:8px 13px;font:700 12px/1.3 var(--mono);margin-bottom:10px;min-height:34px}
+.bubble:after{content:'';position:absolute;left:50%;bottom:-7px;width:14px;height:14px;background:var(--text);transform:translateX(-50%) rotate(45deg);border-radius:2px}
+.bubble.pop{animation:pop .35s ease-out}
+@keyframes pop{0%{transform:scale(.85);opacity:.4}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+.mascot{width:190px;margin:2px auto 0;cursor:pointer;position:relative;z-index:1;filter:drop-shadow(0 10px 18px #000b)}
+.mascot svg{display:block;width:100%;height:auto;overflow:visible}
+.mascot .bull-body{transform-origin:120px 200px;animation:idle 3.2s ease-in-out infinite}
+.mascot .pupil-l{animation:wob-l 2.6s ease-in-out infinite}
+.mascot .pupil-r{animation:wob-r 3.1s ease-in-out infinite}
+.mascot .lid{transform-box:fill-box;transform-origin:center;animation:blink 4.2s infinite}
+.mascot .tp-strip{transform-origin:150px 74px;animation:flap 2.2s ease-in-out infinite}
+.mascot.farming .bull-body{animation:chew .45s ease-in-out infinite alternate}
+.mascot.ready .bull-body{animation:hop .7s ease-in-out infinite}
+.mascot.wiggle .bull-body{animation:wiggle .5s ease-in-out}
+@keyframes idle{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-3px) rotate(-1deg)}}
+@keyframes chew{from{transform:translateY(0) scaleY(1)}to{transform:translateY(3px) scaleY(.97)}}
+@keyframes hop{0%,100%{transform:translateY(0)}45%{transform:translateY(-14px) rotate(2deg)}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+@keyframes wob-l{0%,100%{transform:translate(0,0)}30%{transform:translate(-3px,3px)}60%{transform:translate(3px,-1px)}}
+@keyframes wob-r{0%,100%{transform:translate(0,0)}40%{transform:translate(3px,2px)}70%{transform:translate(-2px,-3px)}}
+@keyframes blink{0%,94%,100%{transform:scaleY(0)}96%,98%{transform:scaleY(1)}}
+@keyframes flap{0%,100%{transform:rotate(0)}50%{transform:rotate(7deg)}}
+.lvl{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px}
+.lvl .title{font:400 22px var(--display);letter-spacing:1px}
+.lvl .num{border:1px solid #ff2a3d77;color:var(--red);border-radius:20px;padding:2px 9px;font:700 11px var(--mono)}
+.balance-label{color:#b9a597;font:700 11px var(--mono);letter-spacing:1px;position:relative}
+.points{position:relative;font:400 54px/1 var(--display);letter-spacing:1px;margin:4px 0 2px}
+.points small{font:700 13px var(--mono);color:var(--red);letter-spacing:0}
+.bar{height:8px;background:#2c1a17;border-radius:10px;overflow:hidden;margin-top:12px;position:relative}
+.bar div{height:100%;background:linear-gradient(90deg,var(--crimson),var(--red));width:0%;transition:width .4s}
+.sub{color:var(--muted);font:400 11px var(--mono);margin-top:7px;position:relative}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 4px}
+.stat{background:var(--panel);border:1px solid var(--line);padding:12px 13px;border-radius:16px}
+.stat .label{color:var(--muted);font:700 10px var(--mono);letter-spacing:1px}
+.stat strong{display:block;font:400 24px var(--display);letter-spacing:.5px;margin-top:3px}
+
+.section{display:flex;align-items:baseline;justify-content:space-between;margin:22px 0 10px}
+.section h2{font:400 26px var(--display);letter-spacing:1px;margin:0}
+.section small{color:var(--muted);font:400 11px var(--mono)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:10px}
+.row{display:flex;align-items:center;gap:12px}
+.orb{height:46px;width:46px;flex:none;display:grid;place-items:center;background:#ff2a3d14;border:1px solid #ff2a3d55;border-radius:14px;font-size:23px}
+.grow{flex:1;min-width:0}.grow strong{display:block}.grow small{color:var(--muted)}
+
+/* views */
+.view{display:none}.view.active{display:block;animation:fadein .25s ease-out}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* tab bar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);gap:2px;max-width:560px;margin:0 auto;
+  padding:7px 8px calc(7px + env(safe-area-inset-bottom));background:linear-gradient(#0a0605d9,#0a0605);backdrop-filter:blur(12px);border-top:1px solid var(--line)}
+.tab{background:transparent;color:var(--muted);padding:5px 0 3px;display:flex;flex-direction:column;align-items:center;gap:1px;font:700 10px var(--mono);letter-spacing:.4px;border-radius:12px}
+.tab .ico{font-size:22px;line-height:1.2;filter:grayscale(1) opacity(.65);transition:transform .15s}
+.tab.active{color:var(--red);background:#ff2a3d12}
+.tab.active .ico{filter:none;transform:translateY(-2px) scale(1.12)}
+.tab .badge{position:absolute;margin:-2px 0 0 18px;background:var(--red);color:var(--ink);border-radius:10px;font:700 9px var(--mono);padding:1px 5px;display:none}
+
+/* check-in */
+.streak-badge{text-align:center;flex:none;min-width:62px}
+.streak-badge b{display:block;font:400 34px/1 var(--display);color:var(--red)}
 .streak-badge small{color:var(--muted);font:700 9px var(--mono);letter-spacing:1px}
 .days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px}
 .day{background:#0f0908;border:1px solid var(--line);border-radius:10px;padding:7px 0;text-align:center}
 .day small{display:block;color:var(--muted);font:700 9px var(--mono)}
 .day b{display:block;font:400 17px var(--display);letter-spacing:.5px;margin-top:2px}
-.day.done{background:#ff2a3d1c;border-color:#ff2a3d88}
-.day.done b{color:var(--red)}
+.day.done{background:#ff2a3d1c;border-color:#ff2a3d88}.day.done b{color:var(--red)}
 .day.next{border-color:var(--text);box-shadow:0 0 0 1px #f1e8d655}
 
-/* herd / friends */
-.herd-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:2px}
+/* missions */
+.task{display:flex;align-items:flex-start;gap:12px}
+.reward{color:var(--gold);font:700 12px var(--mono);margin-top:4px}
+.task p{color:var(--muted);font-size:12px;margin:5px 0}
+.empty{color:var(--muted);font-size:13px;padding:10px 0;text-align:center}
+
+/* herd */
+.herd-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .herd-stats .stat{padding:11px 8px;text-align:center}
-.friend{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
-.friend:last-child{border-bottom:0}
-.friend .name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.refbox{display:flex;gap:8px;margin-top:12px}
+.refbox input{min-width:0;flex:1;background:#0f0908;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:11px;font:400 12px var(--mono);user-select:text;-webkit-user-select:text}
+.friend,.lb{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.friend:last-child,.lb:last-child{border-bottom:0}
+.friend .name,.lb .name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tag{flex:none;border:1px solid var(--line);border-radius:20px;padding:3px 9px;color:var(--muted);font:700 10px var(--mono)}
 .tag.ok{color:var(--red);border-color:#ff2a3d77}
-.ticket-note{color:var(--muted);font-size:13px;margin:6px 0 0}
+.lb.me{color:var(--red);font-weight:700}
+.lb .rank{font:400 20px var(--display);width:30px;color:var(--muted)}
+.lb:nth-child(1) .rank{color:var(--gold)}
 
-/* BullShit Drop */
-.game-shell{margin:0 -2px}
-.game-metrics{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin:0 0 10px}
-.game-metric{background:#150a09;border:1px solid #5b2520;border-radius:12px;padding:9px 12px;text-align:center}
-.game-metric small{display:block;color:#c58f80;font:700 10px var(--mono);letter-spacing:1.5px}
-.game-metric strong{font:400 26px var(--display);color:var(--text);font-variant-numeric:tabular-nums}
-.game-metric.timer{border-color:#ff2a3d66;min-width:78px}
-.game-metric.timer strong{color:var(--red)}
-.arena{height:min(68vh,650px);min-height:430px;position:relative;overflow:hidden;border-radius:18px;background:radial-gradient(ellipse at 50% 45%,#3a120f 0,#1a0807 47%,#090303 100%);border:1px solid #7a1d1d;box-shadow:inset 0 0 55px #ff2a3d1f;touch-action:manipulation}
-.arena:before{content:'';position:absolute;inset:0;background-image:linear-gradient(#ff2a3d14 1px,transparent 1px),linear-gradient(90deg,#ff2a3d14 1px,transparent 1px);background-size:26px 26px;pointer-events:none}
-.arena-hud{position:absolute;z-index:4;left:12px;right:12px;top:12px;display:flex;justify-content:space-between;align-items:center;pointer-events:none}
-.arena-chip{border:1px solid #8b3a32;background:#150a09cc;border-radius:9px;padding:5px 9px;color:#ffb3a8;font:700 11px var(--mono)}
-.drop-target{position:absolute;top:-50px;width:40px;height:40px;min-width:40px;min-height:40px;padding:0;border-radius:50%;display:grid;place-items:center;font-size:22px;line-height:1;background:radial-gradient(circle,#7b4a2c 0,#3a2214 70%);border:1px solid #c98a55;box-shadow:0 0 12px #ff9a4a66;animation:dropfall 1.9s linear forwards;z-index:3;user-select:none}
-.drop-target.bomb{background:radial-gradient(circle,#ff5566 0,#8c0f1d 70%);border-color:#ffb3b9;box-shadow:0 0 14px #ff2a3d99}
-.drop-target:active{transform:scale(.8)}
-@keyframes dropfall{to{top:calc(100% + 45px);opacity:.08;transform:rotate(220deg)}}
-.arena-hint{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:30px;color:var(--text);z-index:5;font:400 28px/1.1 var(--display);letter-spacing:1px;pointer-events:none}
-.arena-hint small{display:block;color:#c9a89a;font:400 12px/1.4 var(--mono);letter-spacing:0;margin-top:8px}
-.game-note{color:#a07a6e;font:400 10px var(--mono);text-align:center;margin:10px 0 16px;letter-spacing:.4px}
-</style></head>
+/* game */
+.hud{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:8px;margin-bottom:10px}
+.metric{background:#150a09;border:1px solid #5b2520;border-radius:12px;padding:8px 10px;text-align:center}
+.metric small{display:block;color:#c58f80;font:700 9px var(--mono);letter-spacing:1.2px}
+.metric strong{display:block;font:400 15px/1.7 var(--pixel);color:var(--text)}
+.metric.timer{border-color:#ff2a3d66;min-width:84px}.metric.timer strong{color:var(--red)}
+.arena{height:min(62vh,560px);min-height:380px;position:relative;overflow:hidden;border-radius:20px;background:radial-gradient(ellipse at 50% 40%,#3a120f 0,#1a0807 50%,#090303 100%);border:1px solid #7a1d1d;box-shadow:inset 0 0 55px #ff2a3d22;touch-action:none}
+.arena:before{content:'';position:absolute;inset:0;background-image:linear-gradient(#ff2a3d12 1px,transparent 1px),linear-gradient(90deg,#ff2a3d12 1px,transparent 1px);background-size:28px 28px;pointer-events:none}
+.arena.shake{animation:shake .3s}
+.arena.slow:after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 60px #6ad8ff55;pointer-events:none;border-radius:20px}
+@keyframes shake{0%,100%{transform:translate(0)}20%{transform:translate(-6px,3px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,2px)}80%{transform:translate(3px,-2px)}}
+.chips{position:absolute;z-index:6;left:10px;right:10px;top:10px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
+.chip{border:1px solid #8b3a32;background:#150a09cc;border-radius:9px;padding:5px 9px;color:#ffb3a8;font:700 10px var(--mono)}
+.chip.combo{color:var(--gold);border-color:#ffc83d77;visibility:hidden}.chip.combo.on{visibility:visible}
+.item{position:absolute;top:-52px;width:46px;height:46px;padding:0;border-radius:50%;display:grid;place-items:center;font-size:27px;line-height:1;background:radial-gradient(circle,#4a2a1a 0,#241109 72%);border:1px solid #c98a55;box-shadow:0 0 12px #ff9a4a55;z-index:3;will-change:transform;touch-action:none}
+.item.gold{background:radial-gradient(circle,#7a5a10 0,#3a2706 72%);border-color:var(--gold);box-shadow:0 0 18px #ffc83dcc}
+.item.gold .e{filter:sepia(1) saturate(7) hue-rotate(-12deg) brightness(1.25)}
+.item.tp{background:radial-gradient(circle,#274a5a 0,#0f2029 72%);border-color:#8fe3ff;box-shadow:0 0 14px #6ad8ffaa}
+.item.candle{background:radial-gradient(circle,#ff5566 0,#8c0f1d 72%);border-color:#ffb3b9;box-shadow:0 0 16px #ff2a3daa}
+.float{position:absolute;z-index:7;font:400 24px var(--display);letter-spacing:1px;pointer-events:none;animation:floatup .75s ease-out forwards;text-shadow:0 2px 6px #000}
+.float.bad{color:#ff5566}.float.good{color:var(--gold)}
+@keyframes floatup{from{opacity:1;transform:translateY(0) scale(.8)}to{opacity:0;transform:translateY(-46px) scale(1.2)}}
+.overlay{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:26px;z-index:5;pointer-events:none}
+.overlay h3{font:400 38px/1 var(--display);letter-spacing:1px;margin:0 0 8px}
+.overlay p{color:#c9a89a;font:400 12px/1.5 var(--mono);margin:6px 0 0}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-top:12px;color:var(--muted);font:400 11px var(--mono)}
+.legend span b{color:var(--text)}
+.startbtn{font-size:15px;padding:16px}
+
+.foot{text-align:center;color:#7a6a60;font:400 10px var(--mono);letter-spacing:.5px;margin-top:26px}
+.foot b{display:block;color:var(--muted);font:400 18px var(--display);letter-spacing:2px;margin-bottom:4px}
+@media (prefers-reduced-motion:reduce){.mascot *,.view.active,.bubble.pop{animation:none!important}}
+</style>
+</head>
 <body>
-<div class="top"><div class="brand"><img src="https://bullshit-site.vercel.app/favicon.png" alt="" onerror="this.style.display='none'">BULL<span>SHIT</span></div><div class="pill" id="userTag">TELEGRAM MINI APP</div></div>
-<div class="hero"><div class="eyebrow">Stay stupid. Stay bullish.</div><h1>Welcome to<br>the <em>herd.</em></h1><p>Farm points. Check in daily. Bring the herd. No utility, just bullshit.</p></div>
-<div id="notice" class="notice"></div>
-<div class="balance"><div class="balance-label">TOTAL AVAILABLE POINTS</div><div class="points" id="points">— <small>PTS</small></div><div class="balance-label" id="username">Syncing your account…</div></div>
-<div class="stats"><div class="stat"><div class="label">FARMING STATUS</div><strong id="farmStatus">Checking…</strong></div><div class="stat"><div class="label">PENDING POINTS</div><strong id="pending">—</strong></div></div>
-<div class="nav"><button class="active" data-view="farm">⚡ Farm</button><button data-view="game">🎮 Game</button><button data-view="tasks">◈ Missions</button><button data-view="invite">🐂 Herd</button></div>
 
-<section class="view" id="view-game"><div class="section"><h2>BullShit Drop</h2><small><span id="dropPlays">3</span> / <span id="dropLimit">3</span> plays left</small></div><div class="game-shell"><div class="game-metrics"><div class="game-metric"><small>YOUR SCORE</small><strong id="dropScore">0</strong></div><div class="game-metric timer"><small>TIME</small><strong id="dropTime">00:30</strong></div><div class="game-metric"><small>MAX REWARD</small><strong>50 PTS</strong></div></div><div class="arena" id="dropArena"><div class="arena-hud"><div class="arena-chip" id="arenaStatus">● READY</div><div class="arena-chip">🐂 BULLSHIT</div></div><div id="arenaHint" class="arena-hint">CATCH THE BULLSHIT 💩<div><small>Tap the falling 💩 to score.<br>Dodge the red candles 🔻.</small><small>Press START ROUND to play</small></div></div></div><div class="game-note">TAP 💩 TO COLLECT &nbsp; · &nbsp; AVOID 🔻 RED CANDLES</div></div><button class="wide" id="dropStart">START ROUND · 30 SEC</button><div class="card" style="margin-top:12px"><div class="farm-row"><div class="orb">⬆</div><div class="grow"><strong>Level <span id="playerLevel">1</span></strong><small id="levelProgress">1,000 points to next level</small><div class="bar"><div id="levelBar"></div></div></div></div></div><div class="card" style="margin-top:12px"><div class="section" style="margin:0 0 8px"><h2>Leaderboard</h2><small id="myRank">Loading…</small></div><div id="leaderboard" class="empty">Loading leaderboard…</div></div><div class="card" style="margin-top:12px"><strong>How to play</strong><p style="color:var(--muted);font-size:13px;margin:6px 0 0">Tap 💩 to score. Avoid 🔻 red candles, they deduct points. You get 3 rounds a day, plus 1 extra round per verified friend in your herd (max +5). Rewards are capped and credited by the server.</p></div></section>
+<div class="top">
+  <div class="brand"><img src="https://bullshit-site.vercel.app/favicon.png" alt="" onerror="this.style.display='none'"><span class="word">BULL<span>SHIT</span></span></div>
+  <div class="pill" id="userTag">CONNECTING…</div>
+</div>
 
-<section class="view active" id="view-farm"><div class="section"><h2>Point generator</h2><small>8-hour cycle</small></div><div class="card"><div class="farm-row"><div class="orb">🐂</div><div class="grow"><strong id="farmTitle">Start a farming session</strong><small id="farmSub">Earn points while you’re away.</small></div></div><div class="bar"><div id="progress"></div></div><button class="wide" id="farmButton">START FARMING</button></div>
-<div class="section"><h2>Daily check-in</h2><small>resets 00:00 UTC</small></div>
-<div class="card"><div class="farm-row"><div class="orb">📅</div><div class="grow"><strong>Show up. Stay dumb.</strong><small id="checkinSub">Loading…</small></div><div class="streak-badge"><b id="streakNum">0</b><small>DAY STREAK</small></div></div><div class="days" id="checkinDays"></div><button class="wide" id="checkinBtn" disabled>CHECK IN</button></div>
-<div class="section"><h2>How it works</h2></div><div class="card"><div class="farm-row"><div class="orb">◷</div><div class="grow"><strong>Start your cycle</strong><small>One active session per account.</small></div></div></div><div class="card"><div class="farm-row"><div class="orb">✧</div><div class="grow"><strong>Come back to claim</strong><small>Rewards are credited by the server.</small></div></div></div></section>
+<!-- ============ FARM ============ -->
+<section class="view active" id="view-farm">
+  <div class="hero-card">
+    <div class="bubble" id="bubble">gm. i am a bull. i do not know what a chart is.</div>
+    <div class="mascot" id="mascot" aria-label="The BullShit bull (tap me)">
+      <svg viewBox="0 0 240 220" role="img" aria-hidden="true">
+        <ellipse cx="120" cy="212" rx="74" ry="7" fill="#000" opacity=".4"/>
+        <g class="bull-body">
+          <!-- shoulders -->
+          <path d="M34 214 C34 172 78 160 120 160 C162 160 206 172 206 214 Z" fill="#2a1712"/>
+          <path d="M86 168 Q120 188 154 168 L154 176 Q120 196 86 176 Z" fill="#6b0f1a" opacity=".55"/>
+          <!-- horns -->
+          <path d="M66 74 C30 66 14 36 26 6 C32 38 52 50 80 54 Z" fill="#f1e8d6" stroke="#cdbf9f" stroke-width="2.5" stroke-linejoin="round"/>
+          <path d="M174 74 C210 66 226 36 214 6 C208 38 188 50 160 54 Z" fill="#f1e8d6" stroke="#cdbf9f" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- ears -->
+          <ellipse cx="44" cy="100" rx="17" ry="10" transform="rotate(-22 44 100)" fill="#3a2119"/>
+          <ellipse cx="196" cy="100" rx="17" ry="10" transform="rotate(22 196 100)" fill="#3a2119"/>
+          <ellipse cx="46" cy="100" rx="9" ry="5" transform="rotate(-22 46 100)" fill="#ff8a6a" opacity=".7"/>
+          <ellipse cx="194" cy="100" rx="9" ry="5" transform="rotate(22 194 100)" fill="#ff8a6a" opacity=".7"/>
+          <!-- head -->
+          <ellipse cx="120" cy="112" rx="70" ry="62" fill="#2a1712"/>
+          <ellipse cx="120" cy="100" rx="52" ry="40" fill="#35201a" opacity=".6"/>
+          <!-- mouth (open) -->
+          <ellipse cx="120" cy="174" rx="26" ry="17" fill="#6b0f1a"/>
+          <ellipse cx="120" cy="186" rx="11" ry="6" fill="#ff7a8a"/>
+          <!-- muzzle -->
+          <ellipse cx="120" cy="152" rx="42" ry="25" fill="#ff8a6a"/>
+          <ellipse cx="120" cy="146" rx="34" ry="15" fill="#ffa488" opacity=".7"/>
+          <ellipse cx="106" cy="148" rx="5.5" ry="7" fill="#4a1a12"/>
+          <ellipse cx="134" cy="148" rx="5.5" ry="7" fill="#4a1a12"/>
+          <rect x="113" y="172" width="10" height="11" rx="2.5" fill="#f6f0e2"/>
+          <!-- eyes: huge + mismatched + cross-eyed -->
+          <circle cx="90" cy="106" r="23" fill="#f6f0e2" stroke="#1a0d0b" stroke-width="3"/>
+          <circle cx="150" cy="100" r="15" fill="#f6f0e2" stroke="#1a0d0b" stroke-width="3"/>
+          <g class="pupil-l"><circle cx="99" cy="114" r="9" fill="#120807"/><circle cx="96" cy="110" r="2.6" fill="#fff"/></g>
+          <g class="pupil-r"><circle cx="143" cy="97" r="6.5" fill="#120807"/><circle cx="141" cy="94.5" r="1.8" fill="#fff"/></g>
+          <ellipse class="lid" cx="90" cy="106" rx="24" ry="24" fill="#2a1712"/>
+          <ellipse class="lid" cx="150" cy="100" rx="16" ry="16" fill="#2a1712"/>
+          <!-- brows -->
+          <path d="M66 80 Q86 70 108 82" stroke="#120807" stroke-width="5" stroke-linecap="round" fill="none"/>
+          <path d="M136 78 Q150 72 164 80" stroke="#120807" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+          <!-- toilet paper roll on head -->
+          <g>
+            <ellipse cx="120" cy="66" rx="31" ry="9" fill="#d9cdb0"/>
+            <rect x="89" y="40" width="62" height="26" fill="#f6f0e2"/>
+            <ellipse cx="120" cy="40" rx="31" ry="9" fill="#fbf7ec"/>
+            <ellipse cx="120" cy="40" rx="12" ry="3.6" fill="#2a1712"/>
+            <path d="M89 40 V66" stroke="#e4d9bf" stroke-width="1.5"/><path d="M151 40 V66" stroke="#e4d9bf" stroke-width="1.5"/>
+            <path class="tp-strip" d="M148 52 Q176 52 178 72 Q179 84 170 86 L164 80 Q168 70 156 66 Z" fill="#fbf7ec" stroke="#e4d9bf" stroke-width="1.2"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+    <div class="lvl"><span class="title" id="lvlTitle">Baby Calf</span><span class="num">LV <span id="playerLevel">1</span></span></div>
+    <div class="balance-label" style="margin-top:10px">YOUR BULLSHIT</div>
+    <div class="points" id="points">— <small>PTS</small></div>
+    <div class="bar"><div id="levelBar"></div></div>
+    <div class="sub" id="levelProgress">loading your dumbness…</div>
+  </div>
 
-<section class="view" id="view-tasks"><div class="section"><h2>Available missions</h2><small id="taskCount">Live list</small></div><div id="taskList" class="empty">Loading missions…</div></section>
+  <div class="stats">
+    <div class="stat"><div class="label">FARM STATUS</div><strong id="farmStatus">Checking…</strong></div>
+    <div class="stat"><div class="label">PENDING</div><strong id="pending">—</strong></div>
+  </div>
 
-<section class="view" id="view-invite"><div class="section"><h2>Your herd</h2><small id="herdCount">—</small></div>
-<div class="herd-stats"><div class="stat"><div class="label">FRIENDS</div><strong id="friendsTotal">0</strong></div><div class="stat"><div class="label">VERIFIED</div><strong id="friendsQualified">0</strong></div><div class="stat"><div class="label">BONUS PLAYS</div><strong id="friendsTickets">+0</strong></div></div>
-<div class="card" style="margin-top:12px"><div class="eyebrow">YOUR INVITE LINK</div><p style="color:var(--muted);font-size:13px">Bring the herd. Each verified friend gives you +1 BullShit Drop round per day (max +5). Pending friends count once they are verified.</p><div class="refbox"><input id="refLink" readonly value="Preparing your invite link…"><button id="copyRef">COPY</button></div><button class="secondary wide" id="shareRef">SHARE IN TELEGRAM</button></div>
-<div class="card"><div class="section" style="margin:0 0 4px"><h2>Friends</h2><small id="friendsPoints">0 PTS earned</small></div><div id="friendsList" class="empty">Loading your herd…</div></div>
-<div class="card"><strong>Fair play, real progress.</strong><p style="color:var(--muted);font-size:13px;margin-bottom:0">Points are an in-app score, not a token or promise of monetary value. Referral rewards are subject to qualification rules.</p></div></section>
+  <div class="section"><h2>Farm bullshit</h2><small>8-hour cycle</small></div>
+  <div class="card">
+    <div class="row"><div class="orb">🌾</div><div class="grow"><strong id="farmTitle">The bull is hungry</strong><small id="farmSub">Start a session and go touch grass.</small></div></div>
+    <div class="bar"><div id="progress"></div></div>
+    <button class="wide startbtn" id="farmButton">START FARMING</button>
+  </div>
+
+  <div class="section"><h2>Daily check-in</h2><small>resets 00:00 UTC</small></div>
+  <div class="card">
+    <div class="row"><div class="orb">📅</div><div class="grow"><strong>Show up. Stay dumb.</strong><small id="checkinSub">Loading…</small></div>
+      <div class="streak-badge"><b id="streakNum">0</b><small>DAY STREAK</small></div></div>
+    <div class="days" id="checkinDays"></div>
+    <button class="wide" id="checkinBtn" disabled>CHECK IN</button>
+  </div>
+</section>
+
+<!-- ============ GAME ============ -->
+<section class="view" id="view-game">
+  <div class="section" style="margin-top:6px"><h2>BullShit Drop</h2><small><span id="dropPlays">3</span> / <span id="dropLimit">3</span> plays left</small></div>
+  <div class="hud">
+    <div class="metric"><small>SCORE</small><strong id="dropScore">0</strong></div>
+    <div class="metric timer"><small>TIME</small><strong id="dropTime">30</strong></div>
+    <div class="metric"><small>MAX</small><strong>50</strong></div>
+  </div>
+  <div class="arena" id="arena">
+    <div class="chips"><div class="chip" id="arenaStatus">● READY</div><div class="chip combo" id="comboChip">COMBO x0</div></div>
+    <div class="overlay" id="arenaHint"><div><h3>CATCH THE BULLSHIT 💩</h3><p>Tap what falls. Dodge the red candles.<br>Combos pay extra.</p></div></div>
+  </div>
+  <button class="wide startbtn" id="dropStart">START ROUND · 30 SEC</button>
+  <div class="card" style="margin-top:12px">
+    <strong>What falls</strong>
+    <div class="legend">
+      <span>💩 <b>+1</b> plain bullshit</span><span>🔻 <b>−3</b> red candle, kills combo</span>
+      <span>💩✨ <b>+3</b> golden bullshit</span><span>🧻 <b>+1</b> slow-mo for 3s</span>
+    </div>
+    <p class="muted" style="font-size:12px;margin:10px 0 0">Chain 6 in a row for bonus points. 3 rounds a day, +1 per verified friend in your herd (max +5). Rewards are capped at 50 and credited by the server.</p>
+  </div>
+</section>
+
+<!-- ============ MISSIONS ============ -->
+<section class="view" id="view-tasks">
+  <div class="section" style="margin-top:6px"><h2>Missions</h2><small id="taskCount">Live list</small></div>
+  <div id="taskList" class="empty">The bull is fetching missions…</div>
+</section>
+
+<!-- ============ HERD ============ -->
+<section class="view" id="view-invite">
+  <div class="section" style="margin-top:6px"><h2>Your herd</h2><small id="herdCount">—</small></div>
+  <div class="herd-stats">
+    <div class="stat"><div class="label">FRIENDS</div><strong id="friendsTotal">0</strong></div>
+    <div class="stat"><div class="label">VERIFIED</div><strong id="friendsQualified">0</strong></div>
+    <div class="stat"><div class="label">BONUS PLAYS</div><strong id="friendsTickets">+0</strong></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <div class="eyebrow">YOUR INVITE LINK</div>
+    <p class="muted" style="font-size:13px;margin:8px 0 0">Bring the herd. Every verified friend gives you +1 Drop round a day (max +5). Pending friends count once they're verified.</p>
+    <div class="refbox"><input id="refLink" readonly value="Preparing your invite link…"><button id="copyRef">COPY</button></div>
+    <button class="secondary wide" id="shareRef">SHARE IN TELEGRAM</button>
+  </div>
+  <div class="card">
+    <div class="section" style="margin:0 0 4px"><h2>Friends</h2><small id="friendsPoints">0 PTS earned</small></div>
+    <div id="friendsList" class="empty">Loading your herd…</div>
+  </div>
+  <div class="section"><h2>Top of the herd</h2><small id="myRank">Loading…</small></div>
+  <div class="card"><div id="leaderboard" class="empty">Loading leaderboard…</div></div>
+  <div class="card"><strong>Fair play, real progress.</strong><p class="muted" style="font-size:13px;margin:6px 0 0">Points are an in-app score, not a token or a promise of monetary value. Referral rewards are subject to qualification rules.</p></div>
+</section>
 
 <div class="foot"><b>STAY STUPID. STAY BULLISH.</b>BULLSHIT · BETA · POINTS HAVE NO PROMISED CASH VALUE</div>
+
+<nav class="tabbar" aria-label="Main">
+  <button class="tab active" data-view="farm"><span class="ico">🐂</span>FARM</button>
+  <button class="tab" data-view="game"><span class="ico">💩</span>DROP</button>
+  <button class="tab" data-view="tasks"><span class="ico">🎯</span>MISSIONS</button>
+  <button class="tab" data-view="invite"><span class="ico">🫂</span>HERD</button>
+</nav>
+<div class="toast" id="toast" role="status"></div>
+
 <script>
 (() => {
-const tg=window.Telegram?.WebApp; tg?.ready(); tg?.expand();
-if(tg?.setHeaderColor) tg.setHeaderColor('#0a0605'); if(tg?.setBackgroundColor) tg.setBackgroundColor('#0a0605');
-let token=null,me=null,farming=null,checkin=null,refreshTimer=null,gameStatus=null,tapBusy=false,dropActive=false,dropSession=null,dropScore=0,dropTime=30,dropTicker=null,spawnTicker=null,dropPlaysRemaining=3,dropDailyLimit=3;
-const $=id=>document.getElementById(id);
-function notice(msg){$('notice').textContent=msg;$('notice').style.display='block'}
-function clearNotice(){$('notice').style.display='none'}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-async function api(path,opts={}){const res=await fetch('/api/v1'+path,{...opts,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{}),...(opts.headers||{})}});let data={};try{data=await res.json()}catch{}if(!res.ok)throw Error(data.detail||('Request failed ('+res.status+')'));return data}
-function updateFarm(){if(!farming?.active){$('farmStatus').textContent='Idle';$('farmTitle').textContent='Start a farming session';$('farmSub').textContent='Earn points while you’re away.';$('farmButton').textContent='START FARMING';$('farmButton').disabled=false;$('progress').style.width='0%';return}const s=farming.session,end=new Date(s.ends_at).getTime(),start=new Date(s.started_at).getTime(),now=Date.now(),remaining=Math.max(0,end-now),pct=Math.min(100,Math.max(0,(now-start)/(end-start)*100));$('farmStatus').textContent=remaining?'Active':'Ready to claim';$('farmTitle').textContent=remaining?'Farming in progress':'Your points are ready';$('farmSub').textContent=remaining?Math.floor(remaining/3600000)+'h '+Math.floor(remaining%3600000/60000)+'m remaining':Number(s.reward_points).toLocaleString()+' points available';$('farmButton').textContent=remaining?'FARMING…':'CLAIM '+Number(s.reward_points).toLocaleString()+' PTS';$('farmButton').disabled=!!remaining;$('progress').style.width=pct+'%'}
-async function refresh(){const [profile,farm]=await Promise.all([api('/me'),api('/farming')]);me=profile;farming=farm;$('points').innerHTML=Number(profile.points.available).toLocaleString()+' <small>PTS</small>';$('pending').textContent=Number(profile.points.pending).toLocaleString();$('username').textContent=profile.username?'@'+profile.username:'Telegram account connected';$('userTag').textContent='IN THE HERD';updateFarm();const botName=window.APP_BOT_USERNAME||'';const link=botName?'https://t.me/'+botName+'?start=ref_'+encodeURIComponent(profile.user_id):'';$('refLink').value=link||'Bot invite link not configured yet'}
-async function refreshGame(){try{const [progress,board]=await Promise.all([api('/progression'),api('/leaderboard')]);$('playerLevel').textContent=String(progress.level);$('levelProgress').textContent=progress.points_to_next_level.toLocaleString()+' points to next level · '+progress.lifetime_points_earned.toLocaleString()+' earned lifetime';$('levelBar').style.width=((progress.lifetime_points_earned%1000)/10)+'%';$('myRank').textContent=board.my_rank?'Your rank #'+board.my_rank:'Top 50';const list=$('leaderboard');list.innerHTML=board.items.length?board.items.slice(0,10).map(item=>'<div style="display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);'+(item.is_me?'color:var(--red);font-weight:800;':'')+'"><span>'+item.rank+'. '+esc(item.username)+(item.is_me?' (you)':'')+'</span><strong>'+Number(item.points).toLocaleString()+' PTS</strong></div>').join(''):'<div class="empty">No ranked players yet.</div>';}catch(e){$('leaderboard').textContent='Leaderboard unavailable right now.';}}
-async function loadTasks(){const data=await api('/tasks');const el=$('taskList');$('taskCount').textContent=data.items.length+' available';if(!data.items.length){el.innerHTML='<div class="empty">No missions are active yet. Check back soon.</div>';return}el.innerHTML=data.items.map(t=>'<div class="card task"><div class="orb">◈</div><div class="grow"><strong>'+esc(t.title)+'</strong><p>'+esc(t.description||'Complete this mission and submit it for review.')+'</p><div class="reward">+'+Number(t.reward_points).toLocaleString()+' PTS</div><button class="secondary wide" data-task="'+esc(t.id)+'">SUBMIT MISSION</button></div></div>').join('');el.querySelectorAll('[data-task]').forEach(b=>b.addEventListener('click',async()=>{const evidence=prompt('Paste evidence or a relevant link (optional):');if(evidence===null)return;try{await api('/tasks/submit',{method:'POST',body:JSON.stringify({task_id:b.dataset.task,evidence:evidence||null})});notice('Mission submitted for review.');b.textContent='SUBMITTED';b.disabled=true}catch(e){notice(e.message)}}))}
+'use strict';
+const tg = window.Telegram?.WebApp;
+try { tg?.ready?.(); tg?.expand?.(); tg?.setHeaderColor?.('#0a0605'); tg?.setBackgroundColor?.('#0a0605'); tg?.disableVerticalSwipes?.(); } catch {}
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n).toLocaleString('en-US');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+function haptic(kind) {
+  try {
+    const h = tg?.HapticFeedback; if (!h) return;
+    if (kind === 'good') h.notificationOccurred('success');
+    else if (kind === 'bad') h.notificationOccurred('error');
+    else if (kind === 'heavy') h.impactOccurred('heavy');
+    else h.impactOccurred('light');
+  } catch {}
+}
 
-/* daily check-in */
-function renderCheckin(){if(!checkin)return;const rewards=checkin.cycle_rewards||[],cd=checkin.cycle_day||0,done=checkin.checked_in_today?cd:(cd>=rewards.length?0:cd),next=checkin.checked_in_today?0:done+1;$('streakNum').textContent=String(checkin.streak);$('checkinDays').innerHTML=rewards.map((r,i)=>{const n=i+1,cls=n<=done?' done':(n===next?' next':'');return '<div class="day'+cls+'"><small>D'+n+'</small><b>+'+r+'</b></div>'}).join('');$('checkinSub').textContent=checkin.checked_in_today?'Done for today. See you tomorrow, herd.':'Claim +'+checkin.next_reward+' PTS. Miss a day and the streak resets.';$('checkinBtn').disabled=!!checkin.checked_in_today;$('checkinBtn').textContent=checkin.checked_in_today?'CHECKED IN ✓':'CHECK IN · +'+checkin.next_reward+' PTS'}
-async function loadCheckin(){try{checkin=await api('/checkin');renderCheckin()}catch(e){$('checkinSub').textContent='Check-in unavailable right now.';$('checkinBtn').disabled=true}}
-$('checkinBtn').addEventListener('click',async()=>{clearNotice();$('checkinBtn').disabled=true;try{const r=await api('/checkin',{method:'POST'});notice('Checked in: day '+r.streak+' · +'+r.awarded_points+' points');await Promise.all([refresh(),loadCheckin()])}catch(e){notice(e.message);await loadCheckin()}});
+/* ---------- copy ---------- */
+const BULL_LINES = [
+  'i do not know what a chart is. i am bullish.',
+  'number go up. number go down. i am confused. still bullish.',
+  'i put the paper roll on my head. do not ask.',
+  'do your own research. i cannot read.',
+  'stay stupid. stay bullish.',
+  'my financial advice: none. my vibes: immaculate.',
+  'is it up? i can not tell. buy more.',
+  'smart people have charts. i have this roll.',
+  'tap me again. i dare you.',
+];
+const LEVEL_TITLES = ['Baby Calf', 'Confused Calf', 'Dumb Bull', 'Paper Hands', 'Diamond Horns', 'Degen Bull', 'Herd Elder', 'Apex Bullshitter'];
+const GRADES = [[0, 'RUGGED.'], [1, 'PAPER HANDS'], [10, 'CERTIFIED DUMB'], [25, 'BULLISH IDIOT'], [40, 'ALMOST GALAXY BRAIN'], [50, 'MAX BULLSHIT']];
+const grade = s => GRADES.filter(g => s >= g[0]).pop()[1];
+const levelTitle = lv => LEVEL_TITLES[Math.min(Math.max(lv, 1), LEVEL_TITLES.length) - 1];
 
-/* herd / friends */
-async function loadFriends(){try{const d=await api('/friends');$('friendsTotal').textContent=String(d.total);$('friendsQualified').textContent=String(d.qualified);$('friendsTickets').textContent='+'+d.bonus_drop_plays;$('herdCount').textContent=d.total?d.total+(d.total===1?' friend':' friends'):'empty';$('friendsPoints').textContent=Number(d.points_earned).toLocaleString()+' PTS earned';$('friendsList').className=d.items.length?'':'empty';$('friendsList').innerHTML=d.items.length?d.items.map(f=>'<div class="friend"><span class="name">'+esc(f.username)+'</span><span style="display:flex;align-items:center;gap:8px">'+(f.reward_points?'<span class="reward" style="margin:0">+'+Number(f.reward_points).toLocaleString()+'</span>':'')+'<span class="tag'+(f.status==='qualified'?' ok':'')+'">'+(f.status==='qualified'?'VERIFIED':(f.status==='rejected'?'REJECTED':'PENDING'))+'</span></span></div>').join(''):'Nobody in your herd yet. Send them your link.'}catch(e){$('friendsList').className='empty';$('friendsList').textContent='Could not load your herd right now.'}}
-$('shareRef').addEventListener('click',()=>{const link=$('refLink').value;if(!link.startsWith('https://'))return notice('Invite link not configured yet.');const url='https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent('Join the BULLSHIT herd. Stay stupid. Stay bullish.');if(tg?.openTelegramLink)tg.openTelegramLink(url);else window.open(url,'_blank')});
+/* ---------- state ---------- */
+let token = null, me = null, farming = null, checkin = null;
+let dropActive = false, dropSession = null, dropScore = 0, dropCombo = 0, dropEnd = 0, dropTick = null, spawnTimer = null;
+let dropPlaysRemaining = 3, dropDailyLimit = 3, slowUntil = 0, slowTimer = null, bubbleLock = 0;
 
-async function boot(){try{if(!tg||!tg.initData){throw Error('Buka game lewat tombol Play di bot Telegram. Login langsung dari browser tidak didukung.')}const auth=await fetch('/api/v1/auth/telegram',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({init_data:tg.initData})});let data={};try{data=await auth.json()}catch{}if(!auth.ok)throw Error(data.detail||'Telegram authentication failed');token=data.access_token;await refresh();await Promise.all([loadTasks(),refreshGame(),refreshDropPlays(),loadCheckin(),loadFriends()]);clearNotice();refreshTimer=setInterval(()=>{if(farming?.active)updateFarm()},15000);const startParam=(new URLSearchParams(window.location.search).get('ref')||tg.initDataUnsafe?.start_param||'').replace(/^ref_/,'');if(startParam&&startParam!==me.user_id){try{await api('/referrals/attribute',{method:'POST',body:JSON.stringify({referrer_id:startParam})})}catch(e){if(!/already|self|attribut/i.test(e.message))console.warn('Referral attribution:',e.message)}}}catch(e){notice(e.message||'Could not connect to the game.');$('farmStatus').textContent='Not connected';$('farmButton').disabled=true;$('points').innerHTML='— <small>PTS</small>'}}
-$('farmButton').addEventListener('click',async()=>{clearNotice();$('farmButton').disabled=true;try{if(!farming?.active){await api('/farming/start',{method:'POST',body:JSON.stringify({duration_hours:8})})}else{await api('/farming/'+encodeURIComponent(farming.session.id)+'/claim',{method:'POST'})}await refresh();notice(farming?.active?'Farming session updated.':'Points claimed successfully.');await refresh()}catch(e){notice(e.message);try{await refresh()}catch{}}finally{$('farmButton').disabled=false;updateFarm()}});
-document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id==='view-'+b.dataset.view));if(b.dataset.view==='invite'&&token)loadFriends()}));
-function setDropPlays(){$('dropPlays').textContent=String(dropPlaysRemaining);$('dropLimit').textContent=String(dropDailyLimit)}
-async function refreshDropPlays(){try{const status=await api('/game/drop/status');dropPlaysRemaining=status.plays_remaining;dropDailyLimit=status.daily_limit||dropDailyLimit;}catch(e){}setDropPlays();if(dropPlaysRemaining<=0&&!dropActive){$('dropStart').disabled=true;$('dropStart').textContent='DAILY PLAYS USED'}}
-function spawnDropTarget(){if(!dropActive)return;const arena=$('dropArena');const bomb=Math.random()<.18;const target=document.createElement('button');target.className='drop-target'+(bomb?' bomb':'');target.type='button';target.textContent=bomb?'🔻':'💩';target.setAttribute('aria-label',bomb?'Red candle':'BullShit');target.style.left=Math.max(2,Math.random()*86)+'%';target.style.animationDuration=(1.35+Math.random()*.55)+'s';target.addEventListener('click',e=>{e.stopPropagation();if(!dropActive||target.dataset.hit)return;target.dataset.hit='1';target.style.animation='none';target.style.transform='scale(1.5)';target.style.opacity='0';if(bomb){dropScore=Math.max(0,dropScore-3);$('arenaStatus').textContent='⚠ RED CANDLE';setTimeout(()=>$('arenaStatus').textContent=dropActive?'● COLLECTING':'● READY',650)}else{dropScore=Math.min(50,dropScore+1);target.style.filter='brightness(1.8)'}$('dropScore').textContent=String(dropScore);setTimeout(()=>target.remove(),80)});arena.appendChild(target);setTimeout(()=>target.remove(),2200)}
-async function startDrop(){if(dropActive||!token)return;$('dropStart').disabled=true;try{const data=await api('/game/drop/start',{method:'POST'});dropSession=data.session_id;dropPlaysRemaining=data.plays_remaining;dropDailyLimit=data.daily_limit||dropDailyLimit;setDropPlays();dropScore=0;dropTime=30;dropActive=true;$('dropScore').textContent='0';$('dropTime').textContent='00:30';$('arenaStatus').textContent='● COLLECTING';$('arenaHint').style.display='none';$('dropArena').querySelectorAll('.drop-target').forEach(x=>x.remove());$('dropStart').textContent='ROUND IN PROGRESS…';spawnTicker=setInterval(spawnDropTarget,420);dropTicker=setInterval(async()=>{dropTime-=1;$('dropTime').textContent='00:'+String(dropTime).padStart(2,'0');if(dropTime<=0){clearInterval(dropTicker);clearInterval(spawnTicker);dropActive=false;$('arenaStatus').textContent='✓ ROUND ENDED';$('dropArena').querySelectorAll('.drop-target').forEach(x=>x.remove());$('dropStart').textContent='CLAIMING REWARD…';try{const result=await api('/game/drop/finish',{method:'POST',body:JSON.stringify({session_id:dropSession,score:dropScore})});notice('Round complete: score '+result.score+' · +'+result.awarded_points+' points');await refresh();}catch(e){notice('Could not claim round: '+e.message)}finally{dropSession=null;$('dropTime').textContent='0s';$('arenaHint').style.display='grid';$('arenaHint').innerHTML='ROUND COMPLETE 🐂<div><small>Score: '+dropScore+' · Start another round when ready</small></div>';$('dropStart').textContent='START ANOTHER ROUND';$('dropStart').disabled=dropPlaysRemaining<=0;if(dropPlaysRemaining<=0)$('dropStart').textContent='DAILY PLAYS USED'}}},1000)}catch(e){notice(e.message);$('dropStart').disabled=false;$('dropStart').textContent='START ROUND · 30 SEC'}}
-$('dropStart').addEventListener('click',startDrop);
-$('copyRef').addEventListener('click',async()=>{const link=$('refLink').value;if(!link.startsWith('https://'))return notice('Invite link belum dikonfigurasi.');try{await navigator.clipboard.writeText(link);$('copyRef').textContent='COPIED';setTimeout(()=>$('copyRef').textContent='COPY',1600)}catch{tg?.showPopup?.({message:link})}});
+/* ---------- ui helpers ---------- */
+let toastTimer = null;
+function toast(msg, kind = '') {
+  const el = $('toast'); el.textContent = msg; el.className = 'toast show ' + kind;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 4200);
+}
+function say(text, lockMs = 0) {
+  const b = $('bubble'); b.textContent = text; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
+  if (lockMs) bubbleLock = Date.now() + lockMs;
+}
+function mood(m) { const el = $('mascot'); el.classList.toggle('farming', m === 'farming'); el.classList.toggle('ready', m === 'ready'); }
+$('mascot').addEventListener('click', () => {
+  const el = $('mascot'); el.classList.remove('wiggle'); void el.offsetWidth; el.classList.add('wiggle');
+  haptic('light'); say(pick(BULL_LINES), 5000);
+});
+setInterval(() => { if (Date.now() > bubbleLock && $('view-farm').classList.contains('active')) say(pick(BULL_LINES)); }, 9000);
+
+async function api(path, opts = {}) {
+  const res = await fetch('/api/v1' + path, { ...opts, headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}), ...(opts.headers || {}) } });
+  let data = {}; try { data = await res.json(); } catch {}
+  if (!res.ok) throw Error(typeof data.detail === 'string' ? data.detail : ('Request failed (' + res.status + ')'));
+  return data;
+}
+
+/* ---------- navigation ---------- */
+document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === b));
+  document.querySelectorAll('.view').forEach(x => x.classList.toggle('active', x.id === 'view-' + b.dataset.view));
+  haptic('light'); window.scrollTo({ top: 0 });
+  if (b.dataset.view === 'invite' && token) { loadFriends(); refreshBoard(); }
+}));
+
+/* ---------- profile + farming ---------- */
+function updateFarm() {
+  if (!farming?.active) {
+    $('farmStatus').textContent = 'Idle'; $('farmTitle').textContent = 'The bull is hungry';
+    $('farmSub').textContent = 'Start a session and go touch grass.'; $('farmButton').textContent = 'START FARMING';
+    $('farmButton').disabled = false; $('progress').style.width = '0%'; mood('');
+    return;
+  }
+  const s = farming.session, end = new Date(s.ends_at).getTime(), start = new Date(s.started_at).getTime(), now = Date.now();
+  const remaining = Math.max(0, end - now), pct = Math.min(100, Math.max(0, (now - start) / (end - start) * 100));
+  $('farmStatus').textContent = remaining ? 'Chewing' : 'Ready!';
+  $('farmTitle').textContent = remaining ? 'Chewing on bullshit…' : 'FRESH BULLSHIT';
+  $('farmSub').textContent = remaining ? Math.floor(remaining / 3600000) + 'h ' + Math.floor(remaining % 3600000 / 60000) + 'm left. Do not poke the bull.' : fmt(s.reward_points) + ' points. Claim before the bull eats them.';
+  $('farmButton').textContent = remaining ? 'FARMING…' : 'CLAIM ' + fmt(s.reward_points) + ' PTS';
+  $('farmButton').disabled = !!remaining; $('progress').style.width = pct + '%';
+  mood(remaining ? 'farming' : 'ready');
+  if (!remaining && Date.now() > bubbleLock) say('FRESH BULLSHIT! claim it. claim it. claim it.');
+}
+async function refresh() {
+  const [profile, farm] = await Promise.all([api('/me'), api('/farming')]);
+  me = profile; farming = farm;
+  $('points').innerHTML = fmt(profile.points.available) + ' <small>PTS</small>';
+  $('pending').textContent = fmt(profile.points.pending);
+  $('userTag').textContent = profile.username ? '@' + profile.username : 'IN THE HERD'; $('userTag').classList.add('on');
+  updateFarm();
+  const botName = window.APP_BOT_USERNAME||'';
+  $('refLink').value = botName ? 'https://t.me/' + botName + '?start=ref_' + encodeURIComponent(profile.user_id) : 'Bot invite link not configured yet';
+}
+async function refreshProgress() {
+  try {
+    const p = await api('/progression');
+    $('playerLevel').textContent = String(p.level); $('lvlTitle').textContent = levelTitle(p.level);
+    $('levelProgress').textContent = fmt(p.points_to_next_level) + ' pts to next level · ' + fmt(p.lifetime_points_earned) + ' earned lifetime';
+    $('levelBar').style.width = ((p.lifetime_points_earned % 1000) / 10) + '%';
+  } catch { $('levelProgress').textContent = 'level unavailable right now'; }
+}
+async function refreshBoard() {
+  try {
+    const board = await api('/leaderboard');
+    $('myRank').textContent = board.my_rank ? 'You are #' + board.my_rank : 'Top 50';
+    $('leaderboard').className = board.items.length ? '' : 'empty';
+    $('leaderboard').innerHTML = board.items.length ? board.items.slice(0, 10).map(i =>
+      '<div class="lb' + (i.is_me ? ' me' : '') + '"><span class="rank">' + i.rank + '</span><span class="name grow">' + esc(i.username) + (i.is_me ? ' (you)' : '') + '</span><strong>' + fmt(i.points) + ' PTS</strong></div>').join('') : 'No ranked bulls yet. Be the first idiot.';
+  } catch { $('leaderboard').className = 'empty'; $('leaderboard').textContent = 'Leaderboard is napping.'; }
+}
+$('farmButton').addEventListener('click', async () => {
+  $('farmButton').disabled = true;
+  try {
+    const wasActive = !!farming?.active;
+    if (!wasActive) await api('/farming/start', { method: 'POST', body: JSON.stringify({ duration_hours: 8 }) });
+    else await api('/farming/' + encodeURIComponent(farming.session.id) + '/claim', { method: 'POST' });
+    await Promise.all([refresh(), refreshProgress()]);
+    if (wasActive) { haptic('good'); toast('Claimed. The bull is proud (probably).', 'good'); say('you claimed it. i have no idea what that means.', 5000); }
+    else { haptic('light'); toast('Farming started. Go do literally anything else.'); }
+  } catch (e) { toast(e.message); try { await refresh(); } catch {} }
+  finally { updateFarm(); }
+});
+setInterval(() => { if (farming?.active) updateFarm(); }, 15000);
+
+/* ---------- daily check-in ---------- */
+function renderCheckin() {
+  if (!checkin) return;
+  const rewards = checkin.cycle_rewards || [], cd = checkin.cycle_day || 0;
+  const done = checkin.checked_in_today ? cd : (cd >= rewards.length ? 0 : cd), next = checkin.checked_in_today ? 0 : done + 1;
+  $('streakNum').textContent = String(checkin.streak);
+  $('checkinDays').innerHTML = rewards.map((r, i) => { const n = i + 1; return '<div class="day' + (n <= done ? ' done' : n === next ? ' next' : '') + '"><small>D' + n + '</small><b>+' + r + '</b></div>'; }).join('');
+  $('checkinSub').textContent = checkin.checked_in_today ? 'Done for today. Come back tomorrow, herd.' : 'Claim +' + checkin.next_reward + ' PTS. Miss a day: the bull forgives, the streak does not.';
+  $('checkinBtn').disabled = !!checkin.checked_in_today;
+  $('checkinBtn').textContent = checkin.checked_in_today ? 'CHECKED IN ✓' : 'CHECK IN · +' + checkin.next_reward + ' PTS';
+}
+async function loadCheckin() {
+  try { checkin = await api('/checkin'); renderCheckin(); } catch { $('checkinSub').textContent = 'Check-in is napping.'; $('checkinBtn').disabled = true; }
+}
+$('checkinBtn').addEventListener('click', async () => {
+  $('checkinBtn').disabled = true;
+  try {
+    const r = await api('/checkin', { method: 'POST' });
+    haptic('good'); toast('Day ' + r.streak + ' · +' + r.awarded_points + ' points. Look at you showing up.', 'good');
+    say('day ' + r.streak + '! i would clap but i have hooves.', 5000);
+    await Promise.all([refresh(), loadCheckin(), refreshProgress()]);
+  } catch (e) { toast(e.message); await loadCheckin(); }
+});
+
+/* ---------- missions ---------- */
+async function loadTasks() {
+  const data = await api('/tasks'), el = $('taskList');
+  $('taskCount').textContent = data.items.length + ' available';
+  if (!data.items.length) { el.className = 'empty'; el.textContent = 'No missions yet. The bull is still thinking of some.'; return; }
+  el.className = '';
+  el.innerHTML = data.items.map(t => '<div class="card task"><div class="orb">🎯</div><div class="grow"><strong>' + esc(t.title) + '</strong><p>' + esc(t.description || 'Do the thing, send proof, get points.') + '</p><div class="reward">+' + fmt(t.reward_points) + ' PTS</div><button class="secondary wide" data-task="' + esc(t.id) + '">SUBMIT MISSION</button></div></div>').join('');
+  el.querySelectorAll('[data-task]').forEach(b => b.addEventListener('click', async () => {
+    const evidence = prompt('Paste a link or proof (optional):'); if (evidence === null) return;
+    try { await api('/tasks/submit', { method: 'POST', body: JSON.stringify({ task_id: b.dataset.task, evidence: evidence || null }) }); toast('Submitted. A human will judge you shortly.', 'good'); b.textContent = 'SUBMITTED'; b.disabled = true; }
+    catch (e) { toast(e.message); }
+  }));
+}
+
+/* ---------- herd ---------- */
+async function loadFriends() {
+  try {
+    const d = await api('/friends');
+    $('friendsTotal').textContent = String(d.total); $('friendsQualified').textContent = String(d.qualified); $('friendsTickets').textContent = '+' + d.bonus_drop_plays;
+    $('herdCount').textContent = d.total ? d.total + (d.total === 1 ? ' friend' : ' friends') : 'empty pasture';
+    $('friendsPoints').textContent = fmt(d.points_earned) + ' PTS earned';
+    $('friendsList').className = d.items.length ? '' : 'empty';
+    $('friendsList').innerHTML = d.items.length ? d.items.map(f => '<div class="friend"><span class="name">' + esc(f.username) + '</span><span style="display:flex;align-items:center;gap:8px">' + (f.reward_points ? '<span class="reward" style="margin:0">+' + fmt(f.reward_points) + '</span>' : '') + '<span class="tag' + (f.status === 'qualified' ? ' ok' : '') + '">' + (f.status === 'qualified' ? 'VERIFIED' : f.status === 'rejected' ? 'REJECTED' : 'PENDING') + '</span></span></div>').join('') : 'Nobody here yet. Send your link to someone equally dumb.';
+  } catch { $('friendsList').className = 'empty'; $('friendsList').textContent = 'Could not load your herd right now.'; }
+}
+$('copyRef').addEventListener('click', async () => {
+  const link = $('refLink').value; if (!link.startsWith('https://')) return toast('Invite link is not configured yet.');
+  try { await navigator.clipboard.writeText(link); $('copyRef').textContent = 'COPIED'; haptic('light'); setTimeout(() => $('copyRef').textContent = 'COPY', 1600); }
+  catch { tg?.showPopup?.({ message: link }); }
+});
+$('shareRef').addEventListener('click', () => {
+  const link = $('refLink').value; if (!link.startsWith('https://')) return toast('Invite link is not configured yet.');
+  const url = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent('Join the BULLSHIT herd. Stay stupid. Stay bullish.');
+  if (tg?.openTelegramLink) tg.openTelegramLink(url); else window.open(url, '_blank');
+});
+
+/* ---------- BullShit Drop ---------- */
+const arena = $('arena');
+const ITEMS = [
+  { k: 'poop',   e: '💩', pts: 1,  w: 60, cls: '' },
+  { k: 'gold',   e: '💩', pts: 3,  w: 10, cls: 'gold' },
+  { k: 'tp',     e: '🧻', pts: 1,  w: 8,  cls: 'tp' },
+  { k: 'candle', e: '🔻', pts: -3, w: 18, cls: 'candle' },
+];
+const TOTAL_W = ITEMS.reduce((a, i) => a + i.w, 0);
+const pickItem = () => { let r = Math.random() * TOTAL_W; for (const it of ITEMS) { if ((r -= it.w) < 0) return it; } return ITEMS[0]; };
+function setDropPlays() { $('dropPlays').textContent = String(dropPlaysRemaining); $('dropLimit').textContent = String(dropDailyLimit); }
+async function refreshDropPlays() {
+  try { const s = await api('/game/drop/status'); dropPlaysRemaining = s.plays_remaining; dropDailyLimit = s.daily_limit || dropDailyLimit; } catch {}
+  setDropPlays();
+  if (dropPlaysRemaining <= 0 && !dropActive) { $('dropStart').disabled = true; $('dropStart').textContent = 'NO PLAYS LEFT TODAY'; }
+}
+function floatText(text, cls, x, y) {
+  const f = document.createElement('div'); f.className = 'float ' + cls; f.textContent = text;
+  f.style.left = Math.max(6, Math.min(x - 14, arena.clientWidth - 60)) + 'px'; f.style.top = Math.max(40, y - 20) + 'px';
+  arena.appendChild(f); setTimeout(() => f.remove(), 800);
+}
+function setCombo(n) {
+  dropCombo = n; const c = $('comboChip');
+  c.textContent = 'COMBO x' + n; c.classList.toggle('on', n >= 3);
+}
+function applySlow() {
+  slowUntil = Date.now() + 3000; arena.classList.add('slow'); $('arenaStatus').textContent = '🧻 SLOW-MO';
+  arena.querySelectorAll('.item').forEach(el => { try { el.getAnimations().forEach(a => a.playbackRate = .45); } catch {} });
+  clearTimeout(slowTimer);
+  slowTimer = setTimeout(() => {
+    slowUntil = 0; arena.classList.remove('slow'); if (dropActive) $('arenaStatus').textContent = '● COLLECTING';
+    arena.querySelectorAll('.item').forEach(el => { try { el.getAnimations().forEach(a => a.playbackRate = 1); } catch {} });
+  }, 3000);
+}
+function hit(item, el, ev) {
+  const ar = arena.getBoundingClientRect(), r = el.getBoundingClientRect(), x = r.left - ar.left, y = r.top - ar.top;
+  el.dataset.hit = '1'; try { el.getAnimations().forEach(a => a.cancel()); } catch {}
+  el.style.transition = 'transform .12s, opacity .12s'; el.style.transform = 'translateY(' + y + 'px) scale(1.6)'; el.style.opacity = '0'; setTimeout(() => el.remove(), 130);
+  if (item.k === 'candle') {
+    dropScore = Math.max(0, dropScore - 3); setCombo(0);
+    arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake'); haptic('bad');
+    floatText('-3', 'bad', x, y); $('arenaStatus').textContent = '⚠ RED CANDLE';
+    setTimeout(() => { if (dropActive && !slowUntil) $('arenaStatus').textContent = '● COLLECTING'; }, 700);
+  } else {
+    setCombo(dropCombo + 1);
+    const bonus = Math.min(2, Math.floor(dropCombo / 6)), gain = item.pts + bonus;
+    dropScore = Math.min(50, dropScore + gain);
+    floatText('+' + gain, item.k === 'gold' ? 'good' : '', x, y);
+    haptic(item.k === 'gold' ? 'heavy' : 'light');
+    if (item.k === 'tp') applySlow();
+  }
+  $('dropScore').textContent = String(dropScore);
+}
+function spawnItem() {
+  if (!dropActive) return;
+  const item = pickItem(), el = document.createElement('button');
+  el.type = 'button'; el.className = 'item ' + item.cls; el.setAttribute('aria-label', item.k);
+  el.innerHTML = '<span class="e">' + item.e + '</span>';
+  el.style.left = (2 + Math.random() * 82) + '%';
+  const elapsed = 1 - Math.max(0, dropEnd - Date.now()) / 30000, dur = (1500 + Math.random() * 700) * (1 - elapsed * .28);
+  const dist = arena.clientHeight + 110, spin = (Math.random() < .5 ? -1 : 1) * (90 + Math.random() * 200);
+  el.addEventListener('pointerdown', ev => { ev.preventDefault(); if (!dropActive || el.dataset.hit) return; hit(item, el, ev); });
+  arena.appendChild(el);
+  const anim = el.animate([{ transform: 'translateY(0) rotate(0deg)' }, { transform: 'translateY(' + dist + 'px) rotate(' + spin + 'deg)' }], { duration: dur, easing: 'linear', fill: 'forwards' });
+  if (slowUntil > Date.now()) anim.playbackRate = .45;
+  anim.onfinish = () => { if (!el.dataset.hit) el.remove(); };
+}
+function clearItems() { arena.querySelectorAll('.item,.float').forEach(x => x.remove()); }
+async function finishDrop() {
+  clearInterval(dropTick); clearInterval(spawnTimer); dropActive = false; slowUntil = 0; arena.classList.remove('slow'); setCombo(0);
+  clearItems(); $('arenaStatus').textContent = '✓ ROUND ENDED'; $('dropTime').textContent = '0'; $('dropStart').textContent = 'COUNTING YOUR BULLSHIT…';
+  const finalScore = dropScore, sid = dropSession;
+  let msg = '';
+  try {
+    const r = await api('/game/drop/finish', { method: 'POST', body: JSON.stringify({ session_id: sid, score: finalScore }) });
+    msg = '+' + r.awarded_points + ' PTS credited'; haptic(r.awarded_points ? 'good' : 'bad');
+    await Promise.all([refresh(), refreshProgress()]);
+  } catch (e) { msg = 'Could not claim: ' + e.message; toast(msg); }
+  dropSession = null;
+  $('arenaHint').style.display = 'grid';
+  $('arenaHint').innerHTML = '<div><h3>' + grade(finalScore) + '</h3><p>Score ' + finalScore + ' · ' + esc(msg) + '</p></div>';
+  $('dropStart').textContent = 'GO AGAIN'; $('dropStart').disabled = dropPlaysRemaining <= 0;
+  if (dropPlaysRemaining <= 0) $('dropStart').textContent = 'NO PLAYS LEFT TODAY';
+}
+async function startDrop() {
+  if (dropActive || !token) return;
+  $('dropStart').disabled = true;
+  try {
+    const d = await api('/game/drop/start', { method: 'POST' });
+    dropSession = d.session_id; dropPlaysRemaining = d.plays_remaining; dropDailyLimit = d.daily_limit || dropDailyLimit; setDropPlays();
+    dropScore = 0; setCombo(0); dropActive = true; dropEnd = Date.now() + 30000;
+    $('dropScore').textContent = '0'; $('dropTime').textContent = '30'; $('arenaStatus').textContent = '● COLLECTING';
+    $('arenaHint').style.display = 'none'; clearItems(); $('dropStart').textContent = 'ROUND IN PROGRESS…'; haptic('heavy');
+    spawnTimer = setInterval(spawnItem, 480); spawnItem();
+    dropTick = setInterval(() => {
+      const left = Math.max(0, dropEnd - Date.now()); $('dropTime').textContent = String(Math.ceil(left / 1000));
+      if (left <= 0) finishDrop();
+    }, 100);
+  } catch (e) { toast(e.message); $('dropStart').disabled = false; $('dropStart').textContent = 'START ROUND · 30 SEC'; }
+}
+$('dropStart').addEventListener('click', startDrop);
+
+/* ---------- boot ---------- */
+async function boot() {
+  try {
+    if (!tg || !tg.initData) throw Error('The bull got lost. Open me from the Play button in the Telegram bot. Browser login is not supported.');
+    const auth = await fetch('/api/v1/auth/telegram', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ init_data: tg.initData }) });
+    let data = {}; try { data = await auth.json(); } catch {}
+    if (!auth.ok) throw Error(typeof data.detail === 'string' ? data.detail : 'Telegram authentication failed');
+    token = data.access_token;
+    await refresh();
+    await Promise.all([refreshProgress(), loadTasks(), refreshDropPlays(), loadCheckin()]);
+    const startParam = (new URLSearchParams(window.location.search).get('ref') || tg.initDataUnsafe?.start_param || '').replace(/^ref_/, '');
+    if (startParam && startParam !== me.user_id) {
+      try { await api('/referrals/attribute', { method: 'POST', body: JSON.stringify({ referrer_id: startParam }) }); }
+      catch (e) { if (!/already|self|attribut/i.test(e.message)) console.warn('Referral attribution:', e.message); }
+    }
+  } catch (e) {
+    toast(e.message || 'Could not connect to the game.');
+    $('userTag').textContent = 'OFFLINE'; $('farmStatus').textContent = 'Not connected'; $('farmButton').disabled = true; $('checkinBtn').disabled = true; $('dropStart').disabled = true;
+    $('points').innerHTML = '— <small>PTS</small>'; $('levelProgress').textContent = 'not connected'; say('i am lost. open me from the bot.', 60000);
+  }
+}
 boot();
 })();
-</script></body></html>
+</script>
+</body>
+</html>
