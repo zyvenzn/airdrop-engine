@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -7,15 +6,15 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.config import settings
-from app.db.models import AdminAuditLog, AdminUser, FarmingSession, PointBalance, Referral, Task, TaskSubmission, User
+from app.db.models import AdminAuditLog, FarmingSession, PointBalance, Task, TaskSubmission, User
 from app.db.session import SessionLocal
 from app.security.dependencies import current_session, require_admin_roles
 from app.security.rate_limit import enforce_rate_limit
 from app.security.sessions import issue_session
 from app.security.telegram import validate_telegram_init_data
 from app.services.farming import claim_farming, start_farming
-from app.services.referrals import attribute_referral
-from app.services.tasks import submit_task
+from app.services.referrals import attribute_referral, qualify_referral
+from app.services.tasks import review_task, submit_task
 
 
 app = FastAPI(title=settings.app_name, version="0.3.0")
@@ -335,8 +334,6 @@ def post_admin_task_review(
     payload: TaskReviewRequest,
     admin: dict = Depends(require_admin_roles("owner", "operator", "reviewer")),
 ) -> dict:
-    from app.services.tasks import review_task
-
     try:
         with SessionLocal.begin() as db:
             submission = review_task(
@@ -350,6 +347,38 @@ def post_admin_task_review(
                 metadata_json="{}",
             ))
             result = {"id": submission.id, "status": submission.status, "verified_at": submission.verified_at}
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return result
+
+
+class ReferralQualifyRequest(BaseModel):
+    reward_points: int = Field(ge=1, le=1_000_000)
+
+
+@app.post(f"{settings.api_prefix}/admin/referrals/{{referral_id}}/qualify", tags=["admin"])
+def post_admin_referral_qualify(
+    referral_id: str,
+    payload: ReferralQualifyRequest,
+    admin: dict = Depends(require_admin_roles("owner", "operator")),
+) -> dict:
+    try:
+        with SessionLocal.begin() as db:
+            referral = qualify_referral(
+                db, referral_id=referral_id, reward_points=payload.reward_points
+            )
+            db.add(AdminAuditLog(
+                admin_id=admin["admin_id"],
+                action="referral.qualify",
+                target_type="referral",
+                target_id=referral.id,
+                metadata_json='{"reward_points":' + str(payload.reward_points) + '}',
+            ))
+            result = {
+                "id": referral.id,
+                "status": referral.status,
+                "qualified_at": referral.qualified_at,
+            }
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     return result
