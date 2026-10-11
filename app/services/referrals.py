@@ -1,0 +1,70 @@
+from datetime import datetime, timezone
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.db.models import Referral, User
+from app.services.points import apply_points
+
+
+def attribute_referral(db: Session, *, referrer_id: str, referred_id: str) -> Referral:
+    if referrer_id == referred_id:
+        raise ValueError("self-referral is not allowed")
+    users = db.scalars(
+        select(User).where(User.id.in_([referrer_id, referred_id])).order_by(User.id).with_for_update()
+    ).all()
+    by_id = {user.id: user for user in users}
+    referrer = by_id.get(referrer_id)
+    referred = by_id.get(referred_id)
+    if referrer is None or referred is None:
+        raise ValueError("both users must exist")
+    if referrer.status != "active" or referred.status != "active":
+        raise ValueError("inactive users cannot be referred")
+
+    existing = db.scalar(
+        select(Referral).where(Referral.referred_id == referred_id).with_for_update()
+    )
+    if existing:
+        if existing.referrer_id == referrer_id:
+            return existing
+        raise ValueError("referrer already assigned and cannot be changed")
+
+    referral = Referral(referrer_id=referrer_id, referred_id=referred_id, status="pending")
+    db.add(referral)
+    db.flush()
+    return referral
+
+
+def qualify_referral(
+    db: Session,
+    *,
+    referral_id: str,
+    reward_points: int,
+    now: datetime | None = None,
+) -> Referral:
+    if reward_points <= 0:
+        raise ValueError("reward_points must be positive")
+    referral = db.scalar(
+        select(Referral).where(Referral.id == referral_id).with_for_update()
+    )
+    if referral is None:
+        raise ValueError("referral not found")
+    if referral.status == "qualified":
+        return referral
+    if referral.status != "pending":
+        raise ValueError("referral is not eligible for qualification")
+
+    # The referral status change and reward must be committed in the same DB transaction.
+    apply_points(
+        db,
+        user_id=referral.referrer_id,
+        amount=reward_points,
+        event_type="referral_reward",
+        idempotency_key=f"referral:{referral.id}",
+        reference_id=referral.id,
+    )
+    referral.status = "qualified"
+    referral.qualified_at = now or datetime.now(timezone.utc)
+    db.add(referral)
+    db.flush()
+    return referral
