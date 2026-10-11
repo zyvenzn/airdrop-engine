@@ -1,10 +1,11 @@
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from app.config import settings
 from app.db.models import PointBalance, User
 from app.db.session import SessionLocal
+from app.security.dependencies import current_session, require_admin_roles
 from app.security.rate_limit import enforce_rate_limit
 from app.security.sessions import issue_session
 from app.security.telegram import validate_telegram_init_data
@@ -70,3 +71,32 @@ def telegram_auth(payload: TelegramAuthRequest, request: Request) -> dict:
         "token_type": "bearer",
         "expires_in": 3600,
     }
+
+
+
+@app.get(f"{settings.api_prefix}/me", tags=["account"])
+def get_me(session: dict = Depends(current_session)) -> dict:
+    """Return the current active user's profile and points balance."""
+    with SessionLocal() as db:
+        user = db.scalar(select(User).where(User.id == session.get("sub")))
+        if user is None or user.status != "active":
+            raise HTTPException(status_code=403, detail="Account is not active")
+        balance = db.get(PointBalance, user.id)
+        return {
+            "user_id": user.id,
+            "telegram_id": user.telegram_id,
+            "username": user.username,
+            "account_status": user.status,
+            "points": {
+                "available": balance.available if balance else 0,
+                "pending": balance.pending if balance else 0,
+            },
+        }
+
+
+@app.get(f"{settings.api_prefix}/admin/me", tags=["admin"])
+def get_admin_me(
+    admin: dict = Depends(require_admin_roles("owner", "operator", "reviewer", "analyst")),
+) -> dict:
+    """Return the authenticated admin identity after role-based authorization."""
+    return admin
