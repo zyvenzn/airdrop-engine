@@ -1,7 +1,7 @@
 from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
@@ -25,6 +25,8 @@ class TelegramAuthRequest(BaseModel):
 
 
 class FarmingStartRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     # Reward rate is deliberately server-controlled; clients cannot raise their own rewards.
     duration_hours: int = Field(default=8, ge=1, le=24)
 
