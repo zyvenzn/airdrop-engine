@@ -35,7 +35,7 @@ class FakeSession:
 
 def test_start_farming_sets_server_timed_session():
     now = datetime(2026, 1, 1, tzinfo=timezone.utc)
-    db = FakeSession([None])
+    db = FakeSession([SimpleNamespace(id="user-1"), None])
     session = start_farming(db, user_id="user-1", now=now)
     assert session.started_at == now
     assert session.ends_at == now + timedelta(hours=8)
