@@ -524,6 +524,19 @@ def post_drop_start(request: Request, session: dict = Depends(current_session)) 
         redis.close()
 
 
+
+@app.get(f"{settings.api_prefix}/game/drop/status", tags=["game"])
+def get_drop_status(session: dict = Depends(current_session)) -> dict:
+    user_id = _user_id(session)
+    day_key = datetime.now(timezone.utc).date().isoformat()
+    redis = Redis.from_url(settings.redis_url, decode_responses=True, socket_timeout=1)
+    try:
+        plays = int(redis.get(f"drop:daily:{user_id}:{day_key}") or 0)
+        return {"plays_used": min(plays, 3), "plays_remaining": max(0, 3 - plays), "daily_limit": 3}
+    finally:
+        redis.close()
+
+
 @app.post(f"{settings.api_prefix}/game/drop/finish", tags=["game"])
 def post_drop_finish(
     payload: DropFinishRequest,
