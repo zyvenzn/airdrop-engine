@@ -496,7 +496,7 @@ class DropFinishRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     session_id: str = Field(min_length=36, max_length=36)
-    score: int = Field(ge=0, le=1000)
+    score: int = Field(ge=0, le=50)
 
 
 @app.post(f"{settings.api_prefix}/game/drop/start", tags=["game"])
