@@ -52,10 +52,9 @@ def test_rate_limit_rejects_request_over_limit(monkeypatch):
     fake = FakeRedis()
     monkeypatch.setattr(rate_limit.Redis, "from_url", lambda *a, **kw: fake)
 
-    for _ in range(2):
-        rate_limit.enforce_rate_limit(
-            _request(), action="test", limit=1, window_seconds=60
-        )
+    rate_limit.enforce_rate_limit(
+        _request(), action="test", limit=1, window_seconds=60
+    )
 
     with pytest.raises(HTTPException) as exc:
         rate_limit.enforce_rate_limit(
