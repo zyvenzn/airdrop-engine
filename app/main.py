@@ -525,6 +525,60 @@ def post_drop_start(request: Request, session: dict = Depends(current_session)) 
 
 
 
+
+@app.get(f"{settings.api_prefix}/leaderboard", tags=["game"])
+def get_leaderboard(session: dict = Depends(current_session)) -> dict:
+    user_id = _user_id(session)
+    with SessionLocal() as db:
+        rows = db.execute(
+            select(User.id, User.username, PointBalance.available)
+            .join(PointBalance, PointBalance.user_id == User.id)
+            .where(User.status == "active")
+            .order_by(PointBalance.available.desc(), User.created_at.asc())
+            .limit(50)
+        ).all()
+        items = [
+            {"rank": i + 1, "user_id": row.id,
+             "username": row.username or "Anonymous",
+             "points": int(row.available),
+             "is_me": row.id == user_id}
+            for i, row in enumerate(rows)
+        ]
+        my_rank = next((item["rank"] for item in items if item["is_me"]), None)
+        return {"items": items, "my_rank": my_rank, "limit": 50}
+
+
+@app.get(f"{settings.api_prefix}/progression", tags=["game"])
+def get_progression(session: dict = Depends(current_session)) -> dict:
+    user_id = _user_id(session)
+    with SessionLocal() as db:
+        user = db.scalar(select(User).where(User.id == user_id))
+        if user is None or user.status != "active":
+            raise HTTPException(status_code=403, detail="Account is not active")
+        earned = db.scalar(
+            select(func.coalesce(func.sum(PointsLedger.amount), 0)).where(
+                PointsLedger.user_id == user_id,
+                PointsLedger.amount > 0,
+            )
+        ) or 0
+        level = min(100, int(earned) // 1000 + 1)
+        next_level_at = level * 1000
+        referrals = db.scalar(
+            select(func.count(Referral.id)).where(
+                Referral.referrer_id == user_id,
+                Referral.status == "qualified",
+            )
+        ) or 0
+        return {
+            "lifetime_points_earned": int(earned),
+            "level": level,
+            "points_to_next_level": max(0, next_level_at - int(earned)),
+            "qualified_referrals": int(referrals),
+            "level_step_points": 1000,
+            "max_level": 100,
+        }
+
+
 @app.get(f"{settings.api_prefix}/game/drop/status", tags=["game"])
 def get_drop_status(session: dict = Depends(current_session)) -> dict:
     user_id = _user_id(session)
