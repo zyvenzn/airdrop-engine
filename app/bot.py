@@ -58,11 +58,11 @@ async def health_server() -> None:
             await reader.readline()
             while True:
                 line = await reader.readline()
-                if line in (b"\\r\\n", b"\\n", b""):
+                if line in (b"\r\n", b"\n", b""):
                     break
             writer.write(
-                b"HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\n"
-                b"Content-Length: 14\\r\\nConnection: close\\r\\n\\r\\n"
+                b"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n"
+                b"Content-Length: 14\r\nConnection: close\r\n\r\n"
                 b'{"status":"ok"}'
             )
             await writer.drain()
