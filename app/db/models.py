@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Index, Integer, String, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -59,6 +59,7 @@ class FarmingSession(Base):
         CheckConstraint("ends_at > started_at", name="ck_farming_session_positive_duration"),
         CheckConstraint("status IN ('active', 'claimed', 'expired', 'cancelled')", name="ck_farming_session_status"),
         CheckConstraint("reward_points > 0", name="ck_farming_reward_positive"),
+        Index("uq_farming_one_active_per_user", "user_id", unique=True, postgresql_where=text("status = 'active'"), sqlite_where=text("status = 'active'")),
     )
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
