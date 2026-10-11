@@ -6,17 +6,18 @@ from typing import Literal
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
 from app.config import settings
-from app.db.models import AdminAuditLog, FarmingSession, PointBalance, Task, TaskSubmission, User
+from app.db.models import AdminAuditLog, FarmingSession, PointBalance, PointsLedger, Task, TaskSubmission, User
 from app.db.session import SessionLocal
 from app.security.dependencies import current_session, require_admin_roles
 from app.security.rate_limit import enforce_rate_limit
 from app.security.sessions import issue_session
 from app.security.telegram import validate_telegram_init_data
 from app.services.farming import claim_farming, start_farming
+from app.services.points import apply_points
 from app.services.referrals import attribute_referral, qualify_referral
 from app.services.tasks import review_task, submit_task
 
@@ -424,4 +425,64 @@ def post_admin_referral_qualify(
             }
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return result
+
+
+GAME_DAILY_LIMIT = 20
+GAME_TAP_REWARD = 2
+
+
+def _game_status(db, user_id: str, day_key: str) -> dict:
+    taps = db.scalar(
+        select(func.count(PointsLedger.id)).where(
+            PointsLedger.user_id == user_id,
+            PointsLedger.event_type == "game_tap",
+            PointsLedger.reference_id == day_key,
+        )
+    ) or 0
+    return {
+        "day": day_key,
+        "taps_used": taps,
+        "taps_remaining": max(0, GAME_DAILY_LIMIT - taps),
+        "daily_limit": GAME_DAILY_LIMIT,
+        "points_per_tap": GAME_TAP_REWARD,
+        "points_earned_today": taps * GAME_TAP_REWARD,
+    }
+
+
+@app.get(f"{settings.api_prefix}/game/status", tags=["game"])
+def get_game_status(session: dict = Depends(current_session)) -> dict:
+    user_id = _user_id(session)
+    day_key = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).date().isoformat()
+    with SessionLocal() as db:
+        user = db.scalar(select(User).where(User.id == user_id))
+        if user is None or user.status != "active":
+            raise HTTPException(status_code=403, detail="Account is not active")
+        return _game_status(db, user_id, day_key)
+
+
+@app.post(f"{settings.api_prefix}/game/tap", tags=["game"])
+def post_game_tap(request: Request, session: dict = Depends(current_session)) -> dict:
+    enforce_rate_limit(request, action="game-tap", limit=30, window_seconds=60)
+    user_id = _user_id(session)
+    day_key = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).date().isoformat()
+    with SessionLocal.begin() as db:
+        user = db.scalar(select(User).where(User.id == user_id).with_for_update())
+        if user is None or user.status != "active":
+            raise HTTPException(status_code=403, detail="Account is not active")
+        status = _game_status(db, user_id, day_key)
+        if status["taps_remaining"] <= 0:
+            raise HTTPException(status_code=429, detail="Daily core taps used. Come back tomorrow.")
+        tap_number = status["taps_used"] + 1
+        apply_points(
+            db,
+            user_id=user_id,
+            amount=GAME_TAP_REWARD,
+            event_type="game_tap",
+            reference_id=day_key,
+            idempotency_key=f"game-tap:{user_id}:{day_key}:{tap_number}",
+        )
+        result = _game_status(db, user_id, day_key)
+        result["awarded_points"] = GAME_TAP_REWARD
+        result["tap_number"] = tap_number
     return result
