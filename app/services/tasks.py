@@ -3,11 +3,14 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db.models import Task, TaskSubmission
+from app.db.models import Task, TaskSubmission, User
 from app.services.points import apply_points
 
 
 def submit_task(db: Session, *, user_id: str, task_id: str, evidence: str | None = None) -> TaskSubmission:
+    user = db.scalar(select(User).where(User.id == user_id))
+    if user is None or user.status != "active":
+        raise ValueError("account is not active")
     task = db.scalar(select(Task).where(Task.id == task_id))
     if task is None or task.status != "active":
         raise ValueError("task is unavailable")
