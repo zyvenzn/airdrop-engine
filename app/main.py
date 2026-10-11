@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
 
@@ -453,7 +454,7 @@ def _game_status(db, user_id: str, day_key: str) -> dict:
 @app.get(f"{settings.api_prefix}/game/status", tags=["game"])
 def get_game_status(session: dict = Depends(current_session)) -> dict:
     user_id = _user_id(session)
-    day_key = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).date().isoformat()
+    day_key = datetime.now(timezone.utc).date().isoformat()
     with SessionLocal() as db:
         user = db.scalar(select(User).where(User.id == user_id))
         if user is None or user.status != "active":
