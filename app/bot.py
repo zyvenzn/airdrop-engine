@@ -33,8 +33,8 @@ async def start(message: Message) -> None:
         if referrer_id and len(referrer_id) <= 64 and all(c.isalnum() or c in "-_" for c in referrer_id):
             app_url = app_url + "?ref=" + referrer_id
     text = (
-        "⚡ <b>Airdrop Engine</b>\n\n"
-        "Welcome to your points hub. Start a farming cycle, complete missions, "
+        "⚡ <b>BullShit</b>\n\n"
+        "Welcome to BullShit Drop. Catch the Drop, farm points, complete missions, "
         "and invite your crew.\n\n"
         "Points are an in-app score and do not guarantee token allocation or monetary value."
     )
@@ -83,10 +83,10 @@ async def main() -> None:
     bot = Bot(token=token)
     dispatcher = Dispatcher()
     dispatcher.include_router(router)
-    await bot.set_my_commands([BotCommand(command="start", description="Open Airdrop Engine")])
+    await bot.set_my_commands([BotCommand(command="start", description="Open BullShit")])
     # Telegram bot identity is fetched at startup to validate the configured token.
     me = await bot.get_me()
-    logging.info("Starting Airdrop Engine bot as @%s; Mini App URL configured", me.username)
+    logging.info("Starting BullShit bot as @%s; Mini App URL configured", me.username)
     await asyncio.gather(health_server(), dispatcher.start_polling(bot, allowed_updates=dispatcher.resolve_used_update_types()))
 
 
