@@ -1,10 +1,15 @@
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Request
 from pydantic import BaseModel, Field
+from sqlalchemy import select
 
 from app.config import settings
+from app.db.models import PointBalance, User
+from app.db.session import SessionLocal
+from app.security.rate_limit import enforce_rate_limit
+from app.security.sessions import issue_session
 from app.security.telegram import validate_telegram_init_data
 
-app = FastAPI(title=settings.app_name, version="0.1.0")
+app = FastAPI(title=settings.app_name, version="0.2.0")
 
 
 class TelegramAuthRequest(BaseModel):
@@ -17,16 +22,51 @@ def live_health() -> dict[str, str]:
 
 
 @app.post(f"{settings.api_prefix}/auth/telegram", tags=["auth"])
-def telegram_auth(payload: TelegramAuthRequest) -> dict:
+def telegram_auth(payload: TelegramAuthRequest, request: Request) -> dict:
+    enforce_rate_limit(request, action="telegram-auth", limit=10, window_seconds=60)
     verified = validate_telegram_init_data(
         payload.init_data,
         settings.telegram_bot_token,
         settings.telegram_initdata_max_age_seconds,
     )
-    # Session issuance is intentionally not implemented until persistent user storage
-    # and session signing/rotation policy are in place.
+    telegram_user = verified["user"]
+    username = telegram_user.get("username")
+    if username is not None:
+        username = str(username)[:64]
+
+    # User creation and initial balance are committed together.
+    with SessionLocal.begin() as db:
+        user = db.scalar(
+            select(User).where(User.telegram_id == verified["telegram_id"]).with_for_update()
+        )
+        if user is None:
+            user = User(
+                telegram_id=verified["telegram_id"],
+                username=username,
+                status="active",
+            )
+            db.add(user)
+            db.flush()
+            db.add(PointBalance(user_id=user.id, available=0, pending=0))
+            db.flush()
+        else:
+            if user.status != "active":
+                from fastapi import HTTPException
+
+                raise HTTPException(status_code=403, detail="Account is not active")
+            user.username = username
+            db.add(user)
+            db.flush()
+        user_id = user.id
+        status_value = user.status
+
+    token = issue_session(user_id=user_id, telegram_id=verified["telegram_id"])
     return {
         "status": "authenticated",
+        "user_id": user_id,
         "telegram_id": verified["telegram_id"],
-        "session_issuance": "pending",
+        "account_status": status_value,
+        "access_token": token,
+        "token_type": "bearer",
+        "expires_in": 3600,
     }
