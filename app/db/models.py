@@ -51,3 +51,53 @@ class PointsLedger(Base):
     idempotency_key: Mapped[str] = mapped_column(String(160), nullable=False)
     balance_bucket: Mapped[str] = mapped_column(String(16), nullable=False, default="available")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+
+
+class FarmingSession(Base):
+    __tablename__ = "farming_sessions"
+    __table_args__ = (
+        CheckConstraint("ends_at > started_at", name="ck_farming_session_positive_duration"),
+        CheckConstraint("status IN ('active', 'claimed', 'expired', 'cancelled')", name="ck_farming_session_status"),
+        CheckConstraint("reward_points > 0", name="ck_farming_reward_positive"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True, nullable=False)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    reward_points: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="active")
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+    __table_args__ = (
+        CheckConstraint("reward_points > 0", name="ck_tasks_reward_positive"),
+        CheckConstraint("status IN ('draft', 'active', 'paused', 'archived')", name="ck_tasks_status"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    title: Mapped[str] = mapped_column(String(160), nullable=False)
+    description: Mapped[str] = mapped_column(String(2000), nullable=False, default="")
+    task_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    verification_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    reward_points: Mapped[int] = mapped_column(Integer, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="draft")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+
+
+class TaskSubmission(Base):
+    __tablename__ = "task_submissions"
+    __table_args__ = (
+        UniqueConstraint("user_id", "task_id", name="uq_task_submission_user_task"),
+        CheckConstraint("status IN ('pending', 'approved', 'rejected')", name="ck_task_submission_status"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid4()))
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True, nullable=False)
+    task_id: Mapped[str] = mapped_column(ForeignKey("tasks.id", ondelete="RESTRICT"), index=True, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="pending")
+    evidence: Mapped[str | None] = mapped_column(String(2000), nullable=True)
+    submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    verified_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
