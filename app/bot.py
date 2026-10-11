@@ -62,7 +62,7 @@ async def health_server() -> None:
                     break
             writer.write(
                 b"HTTP/1.1 200 OK\\r\\nContent-Type: application/json\\r\\n"
-                b"Content-Length: 15\\r\\nConnection: close\\r\\n\\r\\n"
+                b"Content-Length: 14\\r\\nConnection: close\\r\\n\\r\\n"
                 b'{"status":"ok"}'
             )
             await writer.drain()
