@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.db.models import Referral, User
+from app.db.models import PointsLedger, Referral, User
 from app.services.points import apply_points
 
 
@@ -50,6 +50,13 @@ def qualify_referral(
     if referral is None:
         raise ValueError("referral not found")
     if referral.status == "qualified":
+        existing_reward = db.scalar(
+            select(PointsLedger).where(
+                PointsLedger.idempotency_key == f"referral:{referral.id}"
+            )
+        )
+        if existing_reward is None or existing_reward.amount != reward_points:
+            raise ValueError("referral was already qualified with a different reward")
         return referral
     if referral.status != "pending":
         raise ValueError("referral is not eligible for qualification")
