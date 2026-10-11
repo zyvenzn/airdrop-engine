@@ -466,7 +466,7 @@ def get_game_status(session: dict = Depends(current_session)) -> dict:
 def post_game_tap(request: Request, session: dict = Depends(current_session)) -> dict:
     enforce_rate_limit(request, action="game-tap", limit=30, window_seconds=60)
     user_id = _user_id(session)
-    day_key = __import__("datetime").datetime.now(__import__("datetime").timezone.utc).date().isoformat()
+    day_key = datetime.now(timezone.utc).date().isoformat()
     with SessionLocal.begin() as db:
         user = db.scalar(select(User).where(User.id == user_id).with_for_update())
         if user is None or user.status != "active":
