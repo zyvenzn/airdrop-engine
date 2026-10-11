@@ -1,3 +1,4 @@
+import json
 from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request
@@ -32,6 +33,8 @@ class FarmingStartRequest(BaseModel):
 
 
 class TaskSubmitRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     task_id: str = Field(min_length=1, max_length=36)
     evidence: str | None = Field(default=None, max_length=2000)
 
@@ -41,6 +44,8 @@ class ReferralAttributeRequest(BaseModel):
 
 
 class TaskReviewRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     approved: bool
 
 
@@ -324,7 +329,7 @@ def post_admin_task(
         db.add(AdminAuditLog(
             admin_id=admin["admin_id"], action="task.create",
             target_type="task", target_id=task.id,
-            metadata_json='{"status":"' + payload.status + '"}',
+            metadata_json=json.dumps({"status": payload.status}, separators=(",", ":")),
         ))
         result = {"id": task.id, "title": task.title, "status": task.status, "reward_points": task.reward_points}
     return result
@@ -355,6 +360,8 @@ def post_admin_task_review(
 
 
 class ReferralQualifyRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     reward_points: int = Field(ge=1, le=1_000_000)
 
 
@@ -374,7 +381,7 @@ def post_admin_referral_qualify(
                 action="referral.qualify",
                 target_type="referral",
                 target_id=referral.id,
-                metadata_json='{"reward_points":' + str(payload.reward_points) + '}',
+                metadata_json=json.dumps({"reward_points": payload.reward_points}, separators=(",", ":")),
             ))
             result = {
                 "id": referral.id,
