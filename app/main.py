@@ -14,7 +14,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
 from app.config import settings
-from app.db.models import AdminAuditLog, FarmingSession, PointBalance, PointsLedger, Task, TaskSubmission, User
+from app.db.models import AdminAuditLog, FarmingSession, PointBalance, PointsLedger, Referral, Task, TaskSubmission, User
 from app.db.session import SessionLocal
 from app.security.dependencies import current_session, require_admin_roles
 from app.security.rate_limit import enforce_rate_limit
