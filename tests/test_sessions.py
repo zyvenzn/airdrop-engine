@@ -33,3 +33,15 @@ def test_short_secret_fails_closed(monkeypatch):
     monkeypatch.setattr("app.security.sessions.settings.session_secret", "short")
     with pytest.raises(RuntimeError):
         issue_session(user_id="user-1", telegram_id=123, now=1000)
+
+
+def test_session_rejects_non_positive_telegram_id(monkeypatch):
+    monkeypatch.setattr("app.security.sessions.settings.session_secret", "x" * 48)
+    with pytest.raises(ValueError):
+        issue_session(user_id="user-1", telegram_id=0, now=1000)
+
+
+def test_session_rejects_ttl_above_one_day(monkeypatch):
+    monkeypatch.setattr("app.security.sessions.settings.session_secret", "x" * 48)
+    with pytest.raises(ValueError, match="TTL"):
+        issue_session(user_id="user-1", telegram_id=123, now=1000, ttl_seconds=86401)
