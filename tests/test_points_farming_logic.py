@@ -54,7 +54,7 @@ def test_claim_farming_rejects_early_claim():
         claimed_at=None, ends_at=now + timedelta(hours=1), reward_points=80,
     )
     with pytest.raises(ValueError, match="not complete"):
-        claim_farming(FakeSession([farming]), user_id="user-1", session_id="farm-1", now=now)
+        claim_farming(FakeSession([SimpleNamespace(id="user-1", status="active"), farming]), user_id="user-1", session_id="farm-1", now=now)
 
 
 def test_claim_farming_rejects_already_claimed():
