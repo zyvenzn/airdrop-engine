@@ -14,8 +14,9 @@ import pytest
 from sqlalchemy import delete, select, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.db.models import FarmingSession, PointBalance, PointsLedger, User
+from app.db.models import FarmingSession, PointBalance, PointsLedger, Task, TaskSubmission, User
 from app.services.farming import claim_farming, start_farming
+from app.services.tasks import review_task
 from app.services.points import apply_points
 
 
@@ -71,6 +72,7 @@ def test_concurrent_retry_applies_points_once():
         with SessionFactory.begin() as db:
             user = db.scalar(select(User).where(User.telegram_id == telegram_id))
             if user is not None:
+                db.execute(delete(TaskSubmission).where(TaskSubmission.user_id == user.id))
                 db.execute(delete(FarmingSession).where(FarmingSession.user_id == user.id))
                 db.execute(delete(PointsLedger).where(PointsLedger.user_id == user.id))
                 db.execute(delete(PointBalance).where(PointBalance.user_id == user.id))
@@ -181,5 +183,67 @@ def test_concurrent_farming_start_creates_only_one_active_session():
                 db.execute(delete(FarmingSession).where(FarmingSession.user_id == user.id))
                 db.execute(delete(PointsLedger).where(PointsLedger.user_id == user.id))
                 db.execute(delete(PointBalance).where(PointBalance.user_id == user.id))
+                db.delete(user)
+        engine.dispose()
+
+
+def test_concurrent_task_review_rewards_once():
+    engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+    SessionFactory = sessionmaker(bind=engine, expire_on_commit=False)
+    telegram_id = 8_000_000_000 + int(uuid4().int % 1_000_000_000)
+
+    try:
+        with SessionFactory.begin() as db:
+            user = User(telegram_id=telegram_id, username="pg-task-review-test", status="active")
+            db.add(user)
+            db.flush()
+            user_id = user.id
+            db.add(PointBalance(user_id=user_id, available=0, pending=0))
+            task = Task(title="Concurrency test", description="", task_type="manual",
+                        verification_type="manual", reward_points=40, status="active")
+            db.add(task)
+            db.flush()
+            task_id = task.id
+            submission = TaskSubmission(user_id=user_id, task_id=task_id, status="pending")
+            db.add(submission)
+            db.flush()
+            submission_id = submission.id
+
+        barrier = Barrier(2)
+
+        def review_once():
+            barrier.wait(timeout=10)
+            try:
+                with SessionFactory.begin() as db:
+                    review_task(db, submission_id=submission_id, approved=True, reviewer_id="test-reviewer")
+                return "approved"
+            except ValueError:
+                return "rejected"
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            outcomes = list(pool.map(lambda _: review_once(), range(2)))
+
+        assert outcomes.count("approved") == 1
+        assert outcomes.count("rejected") == 1
+        with SessionFactory() as db:
+            balance = db.scalar(select(PointBalance).where(PointBalance.user_id == user_id))
+            entries = db.scalars(select(PointsLedger).where(
+                PointsLedger.user_id == user_id,
+                PointsLedger.idempotency_key == f"task:{submission_id}",
+            )).all()
+            submission = db.get(TaskSubmission, submission_id)
+            assert balance is not None and balance.available == 40
+            assert len(entries) == 1
+            assert submission.status == "approved"
+    finally:
+        with SessionFactory.begin() as db:
+            user = db.scalar(select(User).where(User.telegram_id == telegram_id))
+            if user is not None:
+                db.execute(delete(TaskSubmission).where(TaskSubmission.user_id == user.id))
+                db.execute(delete(FarmingSession).where(FarmingSession.user_id == user.id))
+                db.execute(delete(PointsLedger).where(PointsLedger.user_id == user.id))
+                db.execute(delete(PointBalance).where(PointBalance.user_id == user.id))
+                task_ids = select(Task.id).join(TaskSubmission, TaskSubmission.task_id == Task.id).where(TaskSubmission.user_id == user.id)
+                db.execute(delete(Task).where(Task.id.in_(task_ids)))
                 db.delete(user)
         engine.dispose()
