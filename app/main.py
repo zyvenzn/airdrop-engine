@@ -26,7 +26,7 @@ class TelegramAuthRequest(BaseModel):
 
 
 class FarmingStartRequest(BaseModel):
-    points_per_hour: int = Field(default=10, ge=1, le=1000)
+    # Reward rate is deliberately server-controlled; clients cannot raise their own rewards.
     duration_hours: int = Field(default=8, ge=1, le=24)
 
 
@@ -175,7 +175,6 @@ def post_farming_start(
             farming = start_farming(
                 db,
                 user_id=user_id,
-                points_per_hour=payload.points_per_hour,
                 duration_hours=payload.duration_hours,
             )
             result = {
