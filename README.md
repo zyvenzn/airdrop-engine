@@ -1,14 +1,14 @@
-# Airdrop Engine
+# BullShit — Telegram Drop Game
 
 Telegram bot and Mini App backend for points farming, task campaigns, referrals, and future token-reward eligibility.
 
-> **Development status:** early scaffold. Do not deploy to production or open public farming yet.
+> **Status:** private beta build. Test authentication, rewards, referral qualification, and recovery before opening public farming. Points are not a token or promise of monetary value.
 
 ## Stack
 - Python 3.12, FastAPI, aiogram 3
 - PostgreSQL, SQLAlchemy 2, Alembic
 - Redis for distributed rate limiting
-- Next.js + TypeScript (planned for Mini App and admin UI)
+- Telegram Mini App (HTML/CSS/JS), with admin UI planned
 - pytest and GitHub Actions CI
 
 ## Local setup
@@ -26,7 +26,9 @@ The current Compose API service expects a local `.env` file. Never commit it.
 
 ## Implemented scaffold
 
-- FastAPI liveness endpoint.
+- FastAPI liveness endpoint and Telegram Mini App at `/app`.
+- BullShit Drop: 30-second rounds, server-issued session IDs, daily play allowance, bounded point rewards, and Redis session TTL.
+- Player progression levels derived from lifetime positive ledger entries, plus an available-points leaderboard.
 - Telegram Mini App `initData` signature and age verification, user persistence, initial point-balance creation, and signed bearer sessions.
 - Authenticated `GET /api/v1/me` endpoint that returns the active user's profile and points balance.
 - Farming API: `GET /api/v1/farming`, `POST /api/v1/farming/start`, and `POST /api/v1/farming/{session_id}/claim`. Reward rate is server-controlled.
