@@ -36,16 +36,16 @@ The current Compose API service expects a local `.env` file. Never commit it.
 - SQLAlchemy models and Alembic migrations for users, balances, ledger, farming sessions, tasks/submissions, referrals, admin users, and audit logs.
 - Points, farming, task review, and referral service functions.
 - Database-level partial unique index plus user-row locking to prevent multiple active farming sessions per user.
-- Redis-backed rate limiting on Telegram login.
+- Redis-backed rate limiting on Telegram login, farming, task submission, referral attribution, and admin reward/review mutations.
 - Unit tests for selected authentication and service validation paths, plus a GitHub Actions test workflow.
 
 ## Important limitations
 
 - Admin management and audit-log writing endpoints are not implemented; the current admin endpoint only verifies access and returns the admin identity.
-- These routes are an initial API layer; complete integration tests, operational safeguards, referral qualification policy, and admin-management workflows are still required.
+- These routes are an initial API layer; integration coverage and operational safeguards still need to expand. Admin user provisioning/management and referral qualification policy are not fully implemented.
 - Database concurrency, rollback, idempotency and ledger/balance consistency have **not yet been verified against PostgreSQL**.
 - SQLite-backed database invariant tests cover ledger idempotency, conflicting idempotency keys, insufficient balance rollback, and the active-farming uniqueness index. These do not emulate PostgreSQL row locks; PostgreSQL concurrency tests are still required. CI status must be checked before treating a commit as validated.
-- Session revocation/rotation, comprehensive admin audit enforcement, production secrets policy, backup/restore automation, frontend, and deployment hardening remain incomplete.
+- Server-side account status is checked on every authenticated request, so disabling a user or admin takes effect immediately. Token rotation/revocation lists, production secrets policy, backup/restore automation, frontend, and deployment hardening remain incomplete.
 - No token distribution is implemented or promised. Points do not guarantee token allocation or monetary value.
 
 ## Security principles
