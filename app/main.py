@@ -22,6 +22,8 @@ app = FastAPI(title=settings.app_name, version="0.3.0")
 
 
 class TelegramAuthRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     init_data: str = Field(min_length=1, max_length=16_384)
 
 
@@ -40,6 +42,8 @@ class TaskSubmitRequest(BaseModel):
 
 
 class ReferralAttributeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     referrer_id: str = Field(min_length=1, max_length=36)
 
 
@@ -50,6 +54,8 @@ class TaskReviewRequest(BaseModel):
 
 
 class TaskCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     title: str = Field(min_length=1, max_length=160)
     description: str = Field(default="", max_length=2000)
     task_type: str = Field(min_length=1, max_length=32)
