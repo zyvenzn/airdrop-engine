@@ -173,8 +173,10 @@ def get_farming(session: dict = Depends(current_session)) -> dict:
 @app.post(f"{settings.api_prefix}/farming/start", tags=["farming"])
 def post_farming_start(
     payload: FarmingStartRequest,
+    request: Request,
     session: dict = Depends(current_session),
 ) -> dict:
+    enforce_rate_limit(request, action="farming-start", limit=5, window_seconds=60)
     user_id = _user_id(session)
     try:
         with SessionLocal.begin() as db:
@@ -200,8 +202,10 @@ def post_farming_start(
 @app.post(f"{settings.api_prefix}/farming/{{session_id}}/claim", tags=["farming"])
 def post_farming_claim(
     session_id: str,
+    request: Request,
     session: dict = Depends(current_session),
 ) -> dict:
+    enforce_rate_limit(request, action="farming-claim", limit=10, window_seconds=60)
     user_id = _user_id(session)
     try:
         with SessionLocal.begin() as db:
@@ -233,8 +237,10 @@ def get_tasks(session: dict = Depends(current_session)) -> dict:
 @app.post(f"{settings.api_prefix}/tasks/submit", tags=["tasks"])
 def post_task_submit(
     payload: TaskSubmitRequest,
+    request: Request,
     session: dict = Depends(current_session),
 ) -> dict:
+    enforce_rate_limit(request, action="task-submit", limit=10, window_seconds=60)
     user_id = _user_id(session)
     try:
         with SessionLocal.begin() as db:
@@ -252,8 +258,10 @@ def post_task_submit(
 @app.post(f"{settings.api_prefix}/referrals/attribute", tags=["referrals"])
 def post_referral_attribute(
     payload: ReferralAttributeRequest,
+    request: Request,
     session: dict = Depends(current_session),
 ) -> dict:
+    enforce_rate_limit(request, action="referral-attribute", limit=5, window_seconds=60)
     referred_id = _user_id(session)
     try:
         with SessionLocal.begin() as db:
@@ -339,8 +347,10 @@ def post_admin_task(
 def post_admin_task_review(
     submission_id: str,
     payload: TaskReviewRequest,
+    request: Request,
     admin: dict = Depends(require_admin_roles("owner", "operator", "reviewer")),
 ) -> dict:
+    enforce_rate_limit(request, action="admin-task-review", limit=60, window_seconds=60)
     try:
         with SessionLocal.begin() as db:
             submission = review_task(
@@ -369,8 +379,10 @@ class ReferralQualifyRequest(BaseModel):
 def post_admin_referral_qualify(
     referral_id: str,
     payload: ReferralQualifyRequest,
+    request: Request,
     admin: dict = Depends(require_admin_roles("owner", "operator")),
 ) -> dict:
+    enforce_rate_limit(request, action="admin-referral-qualify", limit=30, window_seconds=60)
     try:
         with SessionLocal.begin() as db:
             referral = qualify_referral(
