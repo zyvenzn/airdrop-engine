@@ -24,6 +24,10 @@ def issue_session(*, user_id: str, telegram_id: int, now: int | None = None, ttl
     secret = settings.session_secret
     if len(secret) < 32:
         raise RuntimeError("SESSION_SECRET must contain at least 32 characters")
+    if not isinstance(user_id, str) or not user_id or len(user_id) > 128:
+        raise ValueError("invalid session user id")
+    if not isinstance(telegram_id, int) or isinstance(telegram_id, bool) or telegram_id <= 0:
+        raise ValueError("telegram id must be a positive integer")
     if ttl_seconds < 60 or ttl_seconds > 86400:
         raise ValueError("session TTL must be between 60 and 86400 seconds")
     issued = int(time.time()) if now is None else now
