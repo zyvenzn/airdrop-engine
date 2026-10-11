@@ -262,6 +262,41 @@ def post_referral_attribute(
     return result
 
 
+@app.get(f"{settings.api_prefix}/tasks/submissions/me", tags=["tasks"])
+def get_my_task_submissions(session: dict = Depends(current_session)) -> dict:
+    user_id = _user_id(session)
+    with SessionLocal() as db:
+        submissions = db.scalars(
+            select(TaskSubmission)
+            .where(TaskSubmission.user_id == user_id)
+            .order_by(TaskSubmission.submitted_at.desc())
+        ).all()
+        return {"items": [
+            {"id": item.id, "task_id": item.task_id, "status": item.status,
+             "submitted_at": item.submitted_at, "verified_at": item.verified_at}
+            for item in submissions
+        ]}
+
+
+@app.get(f"{settings.api_prefix}/admin/task-submissions", tags=["admin"])
+def get_admin_task_submissions(
+    status: Literal["pending", "approved", "rejected"] = "pending",
+    admin: dict = Depends(require_admin_roles("owner", "operator", "reviewer", "analyst")),
+) -> dict:
+    with SessionLocal() as db:
+        submissions = db.scalars(
+            select(TaskSubmission)
+            .where(TaskSubmission.status == status)
+            .order_by(TaskSubmission.submitted_at.asc())
+            .limit(100)
+        ).all()
+        return {"items": [
+            {"id": item.id, "user_id": item.user_id, "task_id": item.task_id,
+             "status": item.status, "evidence": item.evidence, "submitted_at": item.submitted_at}
+            for item in submissions
+        ]}
+
+
 @app.get(f"{settings.api_prefix}/admin/me", tags=["admin"])
 def get_admin_me(
     admin: dict = Depends(require_admin_roles("owner", "operator", "reviewer", "analyst")),
