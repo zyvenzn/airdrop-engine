@@ -1,13 +1,13 @@
 """Transactional, idempotent points mutations.
 
-Call these functions inside a caller-managed SQLAlchemy transaction. For operations that
-may be retried concurrently, a unique ledger key is the final duplicate-reward guard.
+Call these functions inside a caller-managed SQLAlchemy transaction. Locking the parent
+user before checking the ledger serializes point mutations for that user on PostgreSQL,
+so a concurrent retry observes the committed idempotency record.
 """
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.db.models import PointBalance, PointsLedger
+from app.db.models import PointBalance, PointsLedger, User
 
 
 class InsufficientPoints(ValueError):
@@ -35,7 +35,15 @@ def apply_points(
     if not idempotency_key or len(idempotency_key) > 160:
         raise ValueError("invalid idempotency key")
 
-    existing = db.scalar(select(PointsLedger).where(PointsLedger.idempotency_key == idempotency_key))
+    # Serialize all point mutations for this account before reading the ledger.
+    # PostgreSQL READ COMMITTED then lets a waiting retry see the prior commit.
+    user = db.scalar(select(User).where(User.id == user_id).with_for_update())
+    if user is None:
+        raise ValueError("user not found")
+
+    existing = db.scalar(
+        select(PointsLedger).where(PointsLedger.idempotency_key == idempotency_key)
+    )
     if existing:
         _assert_same_operation(
             existing,
@@ -52,19 +60,9 @@ def apply_points(
         select(PointBalance).where(PointBalance.user_id == user_id).with_for_update()
     )
     if balance is None:
-        # Serialize first-time balance creation using the existing parent user row.
-        from app.db.models import User
-
-        user = db.scalar(select(User).where(User.id == user_id).with_for_update())
-        if user is None:
-            raise ValueError("user not found")
-        balance = db.scalar(
-            select(PointBalance).where(PointBalance.user_id == user_id).with_for_update()
-        )
-        if balance is None:
-            balance = PointBalance(user_id=user_id, available=0, pending=0)
-            db.add(balance)
-            db.flush()
+        balance = PointBalance(user_id=user_id, available=0, pending=0)
+        db.add(balance)
+        db.flush()
 
     field = "available" if bucket == "available" else "pending"
     current = getattr(balance, field)
@@ -82,7 +80,7 @@ def apply_points(
     setattr(balance, field, current + amount)
     db.add(balance)
     db.add(entry)
-    # If the unique key races, flush raises IntegrityError; caller must roll back.
+    # The unique ledger key remains the final guard, including cross-account key reuse.
     db.flush()
     return entry
 
