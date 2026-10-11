@@ -239,11 +239,14 @@ def test_concurrent_task_review_rewards_once():
         with SessionFactory.begin() as db:
             user = db.scalar(select(User).where(User.telegram_id == telegram_id))
             if user is not None:
+                task_ids = db.scalars(
+                    select(TaskSubmission.task_id).where(TaskSubmission.user_id == user.id)
+                ).all()
                 db.execute(delete(TaskSubmission).where(TaskSubmission.user_id == user.id))
                 db.execute(delete(FarmingSession).where(FarmingSession.user_id == user.id))
                 db.execute(delete(PointsLedger).where(PointsLedger.user_id == user.id))
                 db.execute(delete(PointBalance).where(PointBalance.user_id == user.id))
-                task_ids = select(Task.id).join(TaskSubmission, TaskSubmission.task_id == Task.id).where(TaskSubmission.user_id == user.id)
-                db.execute(delete(Task).where(Task.id.in_(task_ids)))
+                if task_ids:
+                    db.execute(delete(Task).where(Task.id.in_(task_ids)))
                 db.delete(user)
         engine.dispose()
