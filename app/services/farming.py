@@ -23,6 +23,8 @@ def start_farming(
     user = db.scalar(select(User).where(User.id == user_id).with_for_update())
     if user is None:
         raise ValueError("user not found")
+    if user.status != "active":
+        raise ValueError("account is not active")
     active = db.scalar(
         select(FarmingSession)
         .where(FarmingSession.user_id == user_id, FarmingSession.status == "active")
@@ -57,6 +59,9 @@ def claim_farming(
     )
     if session is None:
         raise ValueError("farming session not found")
+    user = db.scalar(select(User).where(User.id == user_id).with_for_update())
+    if user is None or user.status != "active":
+        raise ValueError("account is not active")
     if session.status != "active" or session.claimed_at is not None:
         raise ValueError("farming session already claimed or inactive")
     if current < session.ends_at:
