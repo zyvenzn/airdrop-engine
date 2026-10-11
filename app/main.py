@@ -1,7 +1,10 @@
 import json
+import os
+from pathlib import Path
 from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -18,7 +21,20 @@ from app.services.referrals import attribute_referral, qualify_referral
 from app.services.tasks import review_task, submit_task
 
 
-app = FastAPI(title=settings.app_name, version="0.3.0")
+app = FastAPI(title=settings.app_name, version="0.4.0")
+
+MINI_APP_FILE = Path(__file__).parent / "static" / "index.html"
+
+
+@app.get("/", include_in_schema=False)
+@app.get("/app", include_in_schema=False)
+def mini_app() -> HTMLResponse:
+    if not MINI_APP_FILE.is_file():
+        raise HTTPException(status_code=503, detail="Mini App assets are not installed")
+    html = MINI_APP_FILE.read_text(encoding="utf-8")
+    bot_username = os.getenv("TELEGRAM_BOT_USERNAME", "").strip().lstrip("@")
+    html = html.replace("window.APP_BOT_USERNAME||''", json.dumps(bot_username))
+    return HTMLResponse(html, headers={"Cache-Control": "no-cache"})
 
 
 class TelegramAuthRequest(BaseModel):
