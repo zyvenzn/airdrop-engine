@@ -48,6 +48,10 @@ The current Compose API service expects a local `.env` file. Never commit it.
 - Server-side account status is checked on every authenticated request, so disabling a user or admin takes effect immediately. Token rotation/revocation lists, production secrets policy, backup/restore automation, frontend, and deployment hardening remain incomplete.
 - No token distribution is implemented or promised. Points do not guarantee token allocation or monetary value.
 
+## Railway deployment
+
+The Railway `airdrop-engine` service should use the repository `Dockerfile`, set `DATABASE_URL` and `REDIS_URL` from the same Railway environment's Postgres and Redis services, and run `alembic upgrade head` before serving traffic. The `/health/live` endpoint is the deployment health check.
+
 ## Security principles
 
 - Never commit `.env`, Telegram bot tokens, database credentials, signing keys, or production secrets.
