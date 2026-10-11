@@ -1,7 +1,15 @@
 import pytest
 from pydantic import ValidationError
 
-from app.main import (\n    FarmingStartRequest, ReferralAttributeRequest, ReferralQualifyRequest,\n    TaskCreateRequest, TaskReviewRequest, TaskSubmitRequest, TelegramAuthRequest,\n)
+from app.main import (
+    FarmingStartRequest,
+    ReferralAttributeRequest,
+    ReferralQualifyRequest,
+    TaskCreateRequest,
+    TaskReviewRequest,
+    TaskSubmitRequest,
+    TelegramAuthRequest,
+)
 
 
 def test_farming_reward_rate_is_not_client_configurable():
